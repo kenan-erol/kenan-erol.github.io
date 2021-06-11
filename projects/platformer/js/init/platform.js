@@ -45,7 +45,7 @@
         createPlatform(550, 380, 0.2, 0.75);
         createPlatform(322, 315, 0.2, 0.75); //middle platform do not delete
         createPlatform(800, 340, 0.2, 0.2); //kennedi
-        createPlatform(20, 250, 0.1, 0.2); //steve
+        
         
         // ALL YOUR CODE GOES ABOVE HERE ///////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////
