@@ -1218,13 +1218,18 @@ pre[class*=language-] {
 
 .hover\:text-emerald-500:hover {
     --tw-text-opacity: 1;
-    color: rgb(107 114 128/var(--tw-text-opacity))
+    color: rgb(5 150 104/var(--tw-text-opacity))
 }
 
-.hover\:text-princeton-300:hover {
+.hover\:text-yale-300:hover {
     --tw-text-opacity: 1;
-    color: rgb(245 200 153/var(--tw-text-opacity))
+    color: rgb(19 52 100/var(--tw-text-opacity))
 }
+.hover\:text-yale-600:hover {
+    --tw-text-opacity: 1;
+    color: rgb(38 104 200/var(--tw-text-opacity))
+}
+
 
 .focus\:text-emerald-400:focus {
     --tw-text-opacity: 1;
@@ -1249,32 +1254,14 @@ pre[class*=language-] {
     border-bottom-right-radius: .25rem
 }
 
-.dark .dark\:border {
-    border-width: 1px
-}
-
-.dark .dark\:border-b {
-    border-bottom-width: 1px
-}
-
-.dark .dark\:border-sky-500 {
-    --tw-border-opacity: 1;
-    border-color: rgb(14 165 233/var(--tw-border-opacity))
-}
-
-.dark .dark\:border-emerald-400 {
-    --tw-border-opacity: 1;
-    border-color: rgb(156 163 175/var(--tw-border-opacity))
-}
-
 .dark .dark\:bg-emerald-800 {
-    --tw-bg-opacity: 1;
-    background-color: rgb(31 41 55/var(--tw-bg-opacity))
+    --tw-bg-opacity: 0.7;
+    background-color: rgb(6 95 70/var(--tw-bg-opacity))
 }
 
 .dark .dark\:bg-emerald-900 {
-    --tw-bg-opacity: 1;
-    background-color: rgb(17 24 39/var(--tw-bg-opacity))
+    --tw-bg-opacity: 0.7;
+    background-color: rgb(6 78 59/var(--tw-bg-opacity))
 }
 
 .dark .dark\:stroke-textDarkColor {
