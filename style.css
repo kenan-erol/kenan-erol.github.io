@@ -802,11 +802,11 @@ a,strong {
 }
 
 a:hover {
-    color: rgb(208 105 0/var(--tw-text-opacity))
+    color: rgb(19 52 100/var(--tw-text-opacity))
 }
 
 .dark a:hover {
-    color: rgb(14 165 233/var(--tw-text-opacity));
+    color: rgb(19 52 100/var(--tw-text-opacity));
     -webkit-text-decoration-line: underline;
     text-decoration-line: underline
 }
@@ -816,12 +816,12 @@ a:hover {
 }
 
 a:focus {
-    color: rgb(208 105 0/var(--tw-text-opacity))
+    color: rgb(19 52 100/var(--tw-text-opacity))
 }
 
 .dark a:focus {
     --tw-text-opacity: 1;
-    color: rgb(14 165 233/var(--tw-text-opacity));
+    color: rgb(19 52 100/var(--tw-text-opacity));
     -webkit-text-decoration-line: underline;
     text-decoration-line: underline
 }
