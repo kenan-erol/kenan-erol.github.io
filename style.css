@@ -386,6 +386,11 @@ img,video {
     margin-right: .5rem
 }
 
+.mx-4 {
+    margin-left: 1rem;
+    margin-right: 1rem
+}
+
 .mx-16 {
     margin-left: 4rem;
     margin-right: 4rem
