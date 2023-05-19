@@ -1,0 +1,108 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+      <title>KENAN'S WEBSITE</title>
+      <style>
+        body {
+          background: url('https://wallpaperaccess.com/full/2609502.jpg');
+          background-repeat: no-repeat;
+          background-attachment: fixed;
+          background-size: cover;
+          color: white;
+          padding: 10px;
+          font-family: arial;
+        }
+        #all-contents {
+          max-width: 1000px;
+          margin: auto;
+        }
+
+        /*navigation menu*/
+        nav {
+          background: rgb(28, 174, 48);
+          margin: 0 auto;
+          margin-bottom: 20px;
+          display: flex;
+          padding: 10px;
+        }
+        h1 {
+          display: flex;
+          align-items: center;
+          color: white;
+          flex: 1;
+          margin: 0;
+        }
+        #nav-ul {
+          list-style-image: none;
+        }
+        .nav-li {
+          display: inline-block;
+          padding: 0 10px;
+        }
+        a {
+          text-decoration: underline overline red;
+          color: #fff;
+        }
+
+        /*main container area beneath menu*/
+        main {
+          background: rgb(28, 174, 48);
+          display: flex;
+        }
+        .sidebar {
+          margin-right: 25px;
+          padding: 10px;
+        }
+        .sidebar-img {
+          width: 200px;
+        }
+        .content {
+          flex: 1;
+          padding: 15px;
+        }
+        #interests {
+          border: 4px red ridge;
+          padding: 8px;
+        }
+        h2, h3 {
+          margin: 0px;
+        }
+      </style>
+    </head>
+    <body>
+      <!-- All content goes here -->
+      <div id="all-contents">
+        <nav>
+          <h1>Kenan's Website</h1>
+          <ul id="nav-ul">
+            <li class="nav-li">
+              <a href="index.html"> Home </a>
+            </li>
+            <li class="nav-li">
+              <a href="portfolio.html"> Portfolio </a>
+            </li>
+          </ul>
+        </nav>
+        <main>
+          <!-- Sidebar section -->
+          <div class="sidebar">
+            <img class="sidebar-img" src="https://i.ibb.co/9t9qfQd/A214-B068-6-CC0-44-D7-909-D-DE20-E6-B4-E7-A8.jpg">
+          </div>
+          <!-- Content section -->
+          <div class="content">
+            <h2>Kenan Erol</h2>
+            <p>student at haynes</p>
+            <!-- Interests section -->
+            <div id="interests">
+                <h3>My Interests</h3>
+                <ul>
+                    <li>Soccer</li>
+                    <li>Sleeping</li>
+                    <li>Space</li>
+                </ul>
+            </div>
+         </div>
+        </main>
+    </div>
+    </body>
+</html>
