@@ -637,6 +637,11 @@ img,video {
     padding-bottom: .5rem
 }
 
+.py-8 {
+    padding-top: 2rem;
+    padding-bottom: 2rem
+}
+
 .pl-8 {
     padding-left: 2rem
 }
