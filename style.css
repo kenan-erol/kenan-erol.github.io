@@ -615,7 +615,8 @@ img,video {
 }
 
 .stroke-textColor {
-    stroke: #353d4c
+    /* stroke: #353d4c; */
+    background-color: #353d4c
 }
 
 .p-2 {
@@ -714,7 +715,7 @@ img,video {
 
 .text-textColor {
     --tw-text-opacity: 1;
-    color: rgb(74 85 104/var(--tw-text-opacity))
+    color: rgb(19 52 100/var(--tw-text-opacity))
 }
 
 .shadow-md {
@@ -770,7 +771,7 @@ img,video {
     position: absolute;
     height: 2px;
     width: 100%;
-    background: #e5e7eb;
+    background: #d8c0c0;
     border-radius: 2px;
     opacity: 1;
     left: 0;
@@ -892,11 +893,11 @@ a,strong {
 }
 
 a:hover {
-    color: rgb(19 52 100/var(--tw-text-opacity))
+    color: rgb(100 52 19/var(--tw-text-opacity))
 }
 
 .dark a:hover {
-    color: rgb(19 52 100/var(--tw-text-opacity));
+    color: rgb(100 52 19/var(--tw-text-opacity));
     -webkit-text-decoration-line: underline;
     text-decoration-line: underline
 }
@@ -906,12 +907,12 @@ a:hover {
 }
 
 a:focus {
-    color: rgb(19 52 100/var(--tw-text-opacity))
+    color: rgb(100 52 19/var(--tw-text-opacity))
 }
 
 .dark a:focus {
     --tw-text-opacity: 1;
-    color: rgb(19 52 100/var(--tw-text-opacity));
+    color: rgb(100 52 19/var(--tw-text-opacity));
     -webkit-text-decoration-line: underline;
     text-decoration-line: underline
 }
@@ -1313,7 +1314,7 @@ pre[class*=language-] {
 
 .hover\:text-yale-300:hover {
     --tw-text-opacity: 1;
-    color: rgb(19 52 100/var(--tw-text-opacity))
+    color: rgb(100 52 19/var(--tw-text-opacity))
 }
 .hover\:text-yale-600:hover {
     --tw-text-opacity: 1;
@@ -1355,7 +1356,8 @@ pre[class*=language-] {
 }
 
 .dark .dark\:stroke-textDarkColor {
-    stroke: #e5e7eb
+    /* stroke: #e5e7eb; */
+    background-color: #e5e7eb
 }
 
 .dark .dark\:text-textDarkColor {
