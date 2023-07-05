@@ -715,6 +715,12 @@ img,video {
 
 .text-textColor {
     --tw-text-opacity: 1;
+    /* color: rgb(19 52 100/var(--tw-text-opacity)) */
+    color: rgb(255 255 255/var(--tw-text-opacity))
+}
+
+.text-darktextColor {
+    --tw-text-opacity: 1;
     color: rgb(19 52 100/var(--tw-text-opacity))
 }
 
@@ -1346,12 +1352,12 @@ pre[class*=language-] {
 }
 
 .dark .dark\:bg-emerald-800 {
-    --tw-bg-opacity: 0.7;
+    --tw-bg-opacity: 1;
     background-color: rgb(6 95 70/var(--tw-bg-opacity))
 }
 
 .dark .dark\:bg-emerald-900 {
-    --tw-bg-opacity: 0.7;
+    --tw-bg-opacity: 1;
     background-color: rgb(6 78 59/var(--tw-bg-opacity))
 }
 
