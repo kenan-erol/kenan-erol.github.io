@@ -606,7 +606,8 @@ img,video {
 
 .bg-emerald-900 {
     --tw-bg-opacity: 1;
-    background-color: rgb(17 24 39/var(--tw-bg-opacity))
+    /* background-color: rgb(17 24 39/var(--tw-bg-opacity)) */
+    background-color: #353d4c
 }
 
 .bg-white {
@@ -1353,12 +1354,14 @@ pre[class*=language-] {
 
 .dark .dark\:bg-emerald-800 {
     --tw-bg-opacity: 1;
-    background-color: rgb(6 95 70/var(--tw-bg-opacity))
+    /* background-color: rgb(6 95 70/var(--tw-bg-opacity)) */
+    background-color: rgb(19 52 100/var(--tw-bg-opacity));
 }
 
 .dark .dark\:bg-emerald-900 {
     --tw-bg-opacity: 1;
-    background-color: rgb(6 78 59/var(--tw-bg-opacity))
+    /* background-color: rgb(6 78 59/var(--tw-bg-opacity)) */
+    background-color: rgb(19 52 100/var(--tw-bg-opacity));
 }
 
 .dark .dark\:stroke-textDarkColor {
