@@ -16,7 +16,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, intial-scale=1.0">
         <link rel="stylesheet" href="style.css">
-        <link rel="icon" href="./assets/kenanhead1.png">
+        <link rel="icon" href="./assets/me.jpg">
         <title>Homepage | Kenan Erol</title>
         <meta name="description" content="Undergraduate Student at Yale University EECS">
         <link rel="canonical" href="https://kenan-erol.com">
@@ -32,20 +32,21 @@
             <div class="flex items-center lg:mx-10 mx-6 py-4">
                 <div>
                     <a key="home" href="/index.html">
-                        <img class="h-6 lg:h-10" src="./assets/kenanhead1.png" alt="Kenan Erol">
+                        <!-- <img class="h-6 lg:h-10" src="./assets/kenanhead1.png" alt="Kenan Erol"> -->
+						Home
                     </a>
                 </div>
                 <!-- <a href="/index.html" to="/" class="pl-8"> Kenan Giray Erol </a> -->
                 <div class="flex-grow"></div>
                 <div class="navbar-menu hidden lg:inline-block flex items-center">
-                    <!---portfolio contact research-->
-                    <a href="/portfolio.html" class="pl-8 py-2"> Portfolio </a>
+                    <!---portfolio contact research also add a contact me ting-->
+                    <a href="/projects.html" class="pl-8 py-2"> Projects </a>
                     <a href="/research.html" class="pl-8 py-2"> Research </a>
                 </div>
                 <div class="navbar-social hidden lg:inline-block flex items-center pl-8">
                     <a href="https://linkedin.com/in/kgerol"> <div class="inline-block"><img class="h-6 lg:h-10" src="./assets/ratio.svg" alt="linkedin"></div> </a>
-                    <a href="https://github.com/kenan-erol"> <div class="inline-block pl-8"><img class="h-6 lg:h-10" src="./assets/git.svg" alt="github"></div> </a>
-                    <a href="https://instagram.com/kenan_giray10/"> <div class="inline-block pl-8"><img class="h-6 lg:h-10" src="./assets/kenanhead1.png" alt="Kenan Erol"></div> </a>
+                    <a href="https://github.com/kenan-erol"> <div class="inline-block pl-8"><img class="h-6 lg:h-9" src="./assets/git.svg" alt="github"></div> </a>
+                    <a href="https://instagram.com/kenan_giray10/"> <div class="inline-block pl-8"><img class="h-6 lg:h-10" src="./assets/me.jpg" alt="Kenan Erol"></div> </a>
                     <a href="https://instagram.com/natparkstones/"> <div class="inline-block pl-8"><img class="h-6 lg:h-10" src="./assets/instagram-color-svgrepo-com.svg" alt="Kenan Erol"></div> </a>
                 </div>
                 <!---mobile-->
@@ -69,13 +70,13 @@
                 </div>
                 
                 <div id="mobileMenu" class="mobile-menu hidden block border-t mx-6 py-8">
-                    <div class="text-center"><a href="/portfolio1.html" class="block py-8"> Portfolio </a>
+                    <div class="text-center"><a href="/projects1.html" class="block py-8"> Projects </a>
                     <a href="/research.html" class="block py-2"> Research </a></div>
                     <div class="flex justify-center">
                         <a href="https://linkedin.com/in/kgerol"> <div class="block py-8"><img class="h-6 lg:h-10" src="./assets/linkedin-svgrepo-com.svg" alt="linkedin"></div> </a>
                         <a href="https://github.com/kenan-erol"> <div class="block py-8 pl-8"><img class="h-6 lg:h-10" src="./assets/git.svg" alt="github"></div> </a> </div>
                     <div class="flex justify-center">
-                        <a href="https://instagram.com/kenan_giray10/"> <div class="block py-4"><img class="h-6 lg:h-10" src="./assets/kenanhead1.png" alt="Kenan Erol"></div> </a>
+                        <a href="https://instagram.com/kenan_giray10/"> <div class="block py-4"><img class="h-6 lg:h-10" src="./assets/me.jpg" alt="Kenan Erol"></div> </a>
                         <a href="https://instagram.com/natparkstones/"> <div class="block py-4 pl-8"><img class="h-6 lg:h-10" src="./assets/instagram-color-svgrepo-com.svg" alt="Kenan Erol"></div> </a>
                     </div>
                 </div>
@@ -85,7 +86,7 @@
                     const mobileMenu = document.getElementById('mobileMenu');
                 
                     menuToggle.addEventListener('click', function() {
-                        console.log('clicked');
+                        //console.log('clicked');
                         mobileMenu.classList.toggle('hidden');
                         //$(this).toggleClass('open');
                         menuToggle.classList.toggle('open');
@@ -105,20 +106,24 @@
                 <!-- <div class="flex flex-col md:flex-row justify-center items-center"> -->
                 <div class="grid grid-cols-4 gaps-4 items-center mb-8">
                     <div class="flex flex-col items-center">
+						<img class="w-64 h-64 rounded-full" src="./assets/me.jpg" alt="Kenan Erol">
                         <div class="text-base mx-8 md:mx-0">
                             <p class="text-center">Kenan Erol</p>
-                            <p class="text-center">Yale University</p>
-                            <p class="text-center">Electrical Engineering and Computer Science</p>
-                            <p class="text-center"><a href="mailto:kenan.erol@yale.edu">kenan.erol@yale.edu</a></p>
+							<p class="text-center"><a href="mailto:kenan.erol@yale.edu">kenan.erol@yale.edu</a></p>
                         </div>
-                        <img class="w-64 h-64 rounded-full" src="./assets/Screenshot 2022-09-30 at 9.57.36 PM.JPEG" alt="Kenan Erol">
                         
                     </div>
                 </div>
                 <div class="text-base mx-8 md:mx-0">
                     <!-- bio introducing myself then talk more about my work? -->
                     <p>
-                        Hi! I'm Kenan, a sophomore at Yale University studying Electrical Engineering and Computer Science.
+                        Hi! I'm Kenan, an EECS student at Yale graduating in 2026. I want to use hardware and software tools to solve challenging problems in biology and aerospace.
+					</p>
+					<p>
+						I have previously worked on projects in computer vision, cybersecurity, systems programming, FPGAs, CubeSats, and web development.
+					</p>
+					<p>
+						I am currently interning at Lunasonde as a Satellite Engineer. I am also working on the YUAA CubeSat project at Yale, where I am writing embedded systems software for a satellite that will measure radiation in the upper atmosphere.
                     </p>
                 </div>
             </div>

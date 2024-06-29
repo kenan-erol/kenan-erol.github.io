@@ -18,7 +18,8 @@ html {
     -moz-tab-size: 4;
     -o-tab-size: 4;
     tab-size: 4;
-    font-family: ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji
+    /* font-family: ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Arial,Noto Sans,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji */
+	font-family:Verdana, Geneva, Tahoma, sans-serif
 }
 
 body {
@@ -562,6 +563,12 @@ img,video {
     align-items: center
 }
 
+#centeredmenu {
+	clear:both;
+	min-width: 220px;
+	margin: auto;
+}
+
 .justify-center {
     justify-content: center
 }
@@ -617,7 +624,7 @@ img,video {
 
 .stroke-textColor {
     /* stroke: #353d4c; */
-    background-color: #353d4c
+    background-color: #0a0b0d
 }
 
 .p-2 {
@@ -716,13 +723,13 @@ img,video {
 
 .text-textColor {
     --tw-text-opacity: 1;
-    /* color: rgb(19 52 100/var(--tw-text-opacity)) */
-    color: rgb(255 255 255/var(--tw-text-opacity))
+    /* color: rgb(250 250 250/var(--tw-text-opacity)) */
+    color: rgb(50 50 50/var(--tw-text-opacity))
 }
 
 .text-darktextColor {
     --tw-text-opacity: 1;
-    color: rgb(19 52 100/var(--tw-text-opacity))
+    color: rgb(250 250 250/var(--tw-text-opacity))
 }
 
 .shadow-md {
@@ -778,7 +785,7 @@ img,video {
     position: absolute;
     height: 2px;
     width: 100%;
-    background: #d8c0c0;
+    background: #0d0b0b;
     border-radius: 2px;
     opacity: 1;
     left: 0;
@@ -927,7 +934,7 @@ a:focus {
 .dark header a {
     font-weight: 700;
     --tw-text-opacity: 1;
-    color: rgb(229 231 235/var(--tw-text-opacity))
+    color: rgb(50 50 50/var(--tw-text-opacity))
 }
 
 .dark header a:hover {
@@ -1355,13 +1362,13 @@ pre[class*=language-] {
 .dark .dark\:bg-emerald-800 {
     --tw-bg-opacity: 1;
     /* background-color: rgb(6 95 70/var(--tw-bg-opacity)) */
-    background-color: rgb(19 52 100/var(--tw-bg-opacity));
+    background-color: rgb(250 250 250/var(--tw-bg-opacity));
 }
 
 .dark .dark\:bg-emerald-900 {
     --tw-bg-opacity: 1;
     /* background-color: rgb(6 78 59/var(--tw-bg-opacity)) */
-    background-color: rgb(19 52 100/var(--tw-bg-opacity));
+    background-color: rgb(250 250 250/var(--tw-bg-opacity));
 }
 
 .dark .dark\:stroke-textDarkColor {
