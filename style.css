@@ -1519,8 +1519,6 @@ pre[class*=language-] {
 }
 
 .profile {
-    /* margin-bottom: 16px; */
-	margin-top:auto;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1528,12 +1526,11 @@ pre[class*=language-] {
 
 .bio {
     max-width: 600px;
-	padding: auto
 }
 @media (min-width: 768px) {
     .info-section {
         flex-direction: row;
-        align-items: flex-start;
+        /* align-items: flex-start; */
         text-align: left;
     }
 
