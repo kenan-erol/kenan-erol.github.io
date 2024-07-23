@@ -44,8 +44,9 @@
                     <!-- <a href="/research.html" class="pl-8 py-2"> Research </a> -->
                 </div>
                 <div class="navbar-social hidden lg:inline-block flex items-center pl-8">
-                    <a href="https://linkedin.com/in/kgerol"> <div class="inline-block"><img class="h-6 lg:h-10" src="./assets/ratio.svg" alt="linkedin"></div> </a>
-                    <a href="https://github.com/kenan-erol"> <div class="inline-block pl-8"><img class="h-6 lg:h-9" src="./assets/git.svg" alt="github"></div> </a>
+                    <a href="https://linkedin.com/in/kgerol"> <div class="inline-block"><img class="h-6 lg:h-10"  src="./assets/ratio.svg" alt="linkedin"></div> </a>
+					<!-- class="h-6 lg:h-10" -->
+                    <a href="https://github.com/kenan-erol"> <div class="inline-block pl-8"><img class="h-6 lg:h-10" src="./assets/git.svg" alt="github"></div> </a>
                     <a href="https://devpost.com/kenan-erol"> <div class="inline-block pl-8"><img class="h-6 lg:h-10" src="./assets/devpost.svg" alt="Devpost"></div> </a>
                     <a href="https://instagram.com/kenan_giray10/"> <div class="inline-block pl-8"><img class="h-6 lg:h-10" src="./assets/instagram-color-svgrepo-com.svg" alt="Kenan Erol"></div> </a>
                 </div>
@@ -104,6 +105,71 @@
         <main class="relative min-h-screen">
 			<div class="container mx-auto max-w-prose mt-8 dark:bg-emerald-800">
 				<!-- add project descriptions links images and link to old protoflio -->
+				<h1 class="text-4xl font-bold"> Projects </h1>
+				<div>
+					<h2 class="text-2xl font-bold"> 2023 </h2>
+					<div>
+						<h3 class="text-xl font-bold"> Dots to the Top <a href="https://github.com/klin2020/hcigroup40"> <img class="h-6 lg:h-10" src="./assets/git.svg" alt="github"> </a></h3>
+						
+						<!-- <video width="320" height="240" controls>
+							<source src="https://drive.google.com/file/d/1F-jPny2gNRr20_-T3iWLaRzfxNjPy88Z/view" type="video/mp4">
+						  Your browser does not support the video tag.
+						  </video> -->
+						<iframe src="https://drive.google.com/file/d/1F-jPny2gNRr20_-T3iWLaRzfxNjPy88Z/preview" width="640" height="480" allow="autoplay"></iframe>
+						<p>
+							As part of my CPSC 484 - Human Computer Interaction class, my team and I built <b>Dots to the Top</b>, an interactive game where users are able to use a Kinect Azure sensor and move body parts to "hit" boxes on a TV display. The score users gain by hitting boxes are then added to their Yale residential college’s combined score, creating an environment of friendly competition and collaboration.
+						</p><p>
+							I built various frontend components like the navigation buttons, and backend components like the leaderboard and the score computing logic. I used HTML, CSS, JavaScript, Phaser, and Figma for this project.
+							
+						</p>
+					</div>
+					<div>
+						<h3 class="text-xl font-bold"> ClassMate (TreeHacks 2023) <a href="https://devpost.com/software/classmate-kqsn18"> <img class="h-6 lg:h-10" src="./assets/devpost.svg" alt="devpost"> </a></h3>
+						<p>
+
+							At Stanford's TreeHacks, my teammates and I created an interactive classroom and educational assistant that compiles a student’s classes and guides them to explore class-related concepts while discouraging the academic abuse of generative AI tools. I used the OpenAI API, HTML, CSS, Flask, and SQLite.
+						</p>
+					</div>
+					<div>
+						<h3 class="text-xl font-bold"> FridgeSmartly (Columbia DivHacks 2023) <a href="https://devpost.com/software/tbd-7wax6h"> <img class="h-6 lg:h-10" src="./assets/devpost.svg" alt="devpost"> </a></h3>
+						<p>
+							At Columbia's DivHacks, my team and I created an augmented reality (AR) mobile app that functions as a “virtual fridge”, aiming to assist users in preventing food waste by reminding users of expiring foods and what is actually in their fridge. We used Swift and Echo3D for this project.
+						</p>
+						<p>
+							Our innovative idea won us the Best Use of Echo3D prize at the hackathon.
+						</p>
+					</div>
+				</div>
+				<div>
+					<h2 class="text-2xl font-bold"> 2022 </h2>
+					<div>
+						<h3 class="text-xl font-bold"> Microbe Classification <a href="https://github.com/kenan-erol/MicrobeClassification"> <img class="h-6 lg:h-10" src="./assets/git.svg" alt="github"> </a></h3>
+						<p>
+							I created a multi-class classifier that can differentiate 10 types of microbes according to 25 features (such as radii, eccentricity, diameter, and Euler number) with 97% accuracy. I used XGBoost, Scikit-learn, PySpark, Pandas, and NumPy.
+						</p>
+					</div>
+					<div>
+						<h3 class="text-xl font-bold"> Lung Cancer Classifier ML <a href="https://github.com/kenan-erol/AIHealthLungCancer"> <img class="h-6 lg:h-10" src="./assets/git.svg" alt="github"> </a></h3>
+						<p>
+							As part of the AI4ALL Health Special Interest Group, I developed a convolutional neural network to detect tumors and classify stage of cancer in lung computed tomography (CT) scans with 99% accuracy, using Tensorflow, Keras, and Scikit-learn.
+						</p>
+						<p>
+							Our team published the model as a free resource against increasingly expensive healthcare costs in the U.S., saving the average user $500–$1000 and 24–96 hours of crucial physician diagnostic time.
+						</p>
+						<p>
+							We presented the product to industry professionals at the AI4ALL SIG Conference on artificial intelligence.
+						</p>
+					</div>
+				</div>
+				<div>
+					<h2 class="text-2xl font-bold"> 2021 </h2>
+					<div>
+						<h3 class="text-xl font-bold"> My First Portfolio </h3>
+						<p>
+							This was the first website I built. <a href="/old-main.html">While not very aesthetically pleasing</a>, it was a great learning experience for me. I used HTML, CSS, and JavaScript for this project.
+						</p>
+					</div>
+				</div>
 			</div>
 		</main>
     </body>

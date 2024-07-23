@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+    <script>
+        const prefersDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const isDarkMode = prefersDarkMode;
+
+        const html = document.querySelector("html");
+
+        if(isDarkMode) {
+            html.classList.add("dark");
+        } else {
+            html.classList.remove("dark");
+        }
+    </script>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, intial-scale=1.0">
+        <link rel="stylesheet" href="style.css">
+        <link rel="icon" href="./assets/me.jpg">
+        <title>Homepage | Kenan Erol</title>
+        <meta name="description" content="Undergraduate Student at Yale University EECS">
+        <link rel="canonical" href="https://kenan-erol.com">
+        <meta property="og:locale" content="en_US">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="Homepage | Kenan Erol">
+        <meta property="og:description" content="Undergraduate Student at Yale University EECS">
+        <meta property="og:url" content="https://kenan-erol.com">
+        <meta property="og:site_name" content="Homepage | Kenan Erol">
+    </head>
+    <body class="text-textColor dark:darktext-textColor dark:bg-emerald-800">
+        <header class="sticky top-0 z-50 w-full shadow-md bg-white dark:bg-emerald-900 text-textColor dark:darktext-textColor text-sm">
+            <div class="flex items-center lg:mx-10 mx-6 py-4">
+                <div>
+                    <a key="home" href="/index.html">
+                        <!-- <img class="h-6 lg:h-10" src="./assets/kenanhead1.png" alt="Kenan Erol"> -->
+						Home
+                    </a>
+                </div>
+                <!-- <a href="/index.html" to="/" class="pl-8"> Kenan Giray Erol </a> -->
+                <div class="flex-grow"></div>
+                <div class="navbar-menu hidden lg:inline-block flex items-center">
+                    <!---portfolio contact research also add a contact me ting-->
+                    <a href="/projects.html" class="pl-8 py-2"> Projects </a>
+                    <!-- <a href="/research.html" class="pl-8 py-2"> Research </a> -->
+                </div>
+                <div class="navbar-social hidden lg:inline-block flex items-center pl-8">
+                    <a href="https://linkedin.com/in/kgerol"> <div class="inline-block"><img class="h-6 lg:h-10"  src="./assets/ratio.svg" alt="linkedin"></div> </a>
+					<!-- class="h-6 lg:h-10" -->
+                    <a href="https://github.com/kenan-erol"> <div class="inline-block pl-8"><img class="h-6 lg:h-10" src="./assets/git.svg" alt="github"></div> </a>
+                    <a href="https://devpost.com/kenan-erol"> <div class="inline-block pl-8"><img class="h-6 lg:h-10" src="./assets/devpost.svg" alt="Devpost"></div> </a>
+                    <a href="https://instagram.com/kenan_giray10/"> <div class="inline-block pl-8"><img class="h-6 lg:h-10" src="./assets/instagram-color-svgrepo-com.svg" alt="Kenan Erol"></div> </a>
+                </div>
+                <!---mobile-->
+                <div class="lg:hidden">
+                    <button id="menuToggle" aria-label="menu" class="block focus:outline-none">
+                        <div class="menu-toggle h-6 w-6">
+                            <!-- <svg class="stroke-textColor dark:stroke-textColor"  viewBox="0 0 20 20" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                                <line class="top" x1="0" y1="2" x2="20" y2="2" style="stroke-width: 2"></line>
+                                <line class="middle" x1="0" y1="10" x2="20" y2="10" style="stroke-width: 2"></line>
+                                <line class="bottom" x1="0" y1="18" x2="20" y2="18" style="stroke-width: 2"></line>
+                            </svg> -->
+                            <div id="nav-icon3">
+                                <span class="stroke-textDarkColor dark:stroke-textColor"></span>
+                                <span class="stroke-textDarkColor dark:stroke-textColor"></span>
+                                <span class="stroke-textDarkColor dark:stroke-textColor"></span>
+                                <span class="stroke-textDarkColor dark:stroke-textColor"></span>
+                              </div>
+                        </div>
+                        </div>
+                    </button>
+                </div>
+                
+                <div id="mobileMenu" class="mobile-menu hidden block border-t mx-6 py-8">
+                    <div class="text-center"><a href="/projects.html" class="block py-8"> Projects </a>
+                    <!-- <a href="/research.html" class="block py-2"> Research </a></div> -->
+                    <div class="flex justify-center">
+                        <a href="https://linkedin.com/in/kgerol"> <div class="block py-8"><img class="h-6 lg:h-10" src="./assets/linkedin-svgrepo-com.svg" alt="linkedin"></div> </a>
+                        <a href="https://github.com/kenan-erol"> <div class="block py-8 pl-8"><img class="h-6 lg:h-10" src="./assets/git.svg" alt="github"></div> </a> </div>
+                    <div class="flex justify-center">
+						<a href="https://devpost.com/kenan-erol"> <div class="block py-4"><img class="h-6 lg:h-10" src="./assets/devpost.svg" alt="Devpost"></div> </a>
+                        <a href="https://instagram.com/kenan_giray10/">
+						<div class="block py-4 pl-8"><img class="h-6 lg:h-10" src="./assets/instagram-color-svgrepo-com.svg" alt="Kenan Erol"></div> </a>
+                    </div>
+                </div>
+                
+                <script>
+                    const menuToggle = document.getElementById('nav-icon3');
+                    const mobileMenu = document.getElementById('mobileMenu');
+                
+                    menuToggle.addEventListener('click', function() {
+                        //console.log('clicked');
+                        mobileMenu.classList.toggle('hidden');
+                        //$(this).toggleClass('open');
+                        menuToggle.classList.toggle('open');
+                    });
+
+                    /*$(document).ready(function(){
+                        $('#nav-icon3').click(function(){
+                            $(this).toggleClass('open');
+                        });
+                    });*/
+                </script>
+                
+        </header>
+        <main class="relative min-h-screen">
+			<div class="container mx-auto max-w-prose mt-8 dark:bg-emerald-800">
+				<!-- add project descriptions links images and link to old protoflio -->
+				<h1 class="text-4xl font-bold"> Research </h1>
+				<div>
+					<h2 class="text-2xl font-bold"> 2023 </h2>
+					<div></div>
+				</div>
+				<div>
+					<h2 class="text-2xl font-bold"> 2022 </h2>
+					<div></div>
+				</div>
+			</div>
+		</main>
+    </body>
+</html>
