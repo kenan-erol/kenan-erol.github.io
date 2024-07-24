@@ -1548,3 +1548,8 @@ pre[class*=language-] {
         margin-bottom: 0;
     }
 }
+
+iframe {
+	width: auto;
+	height: auto;
+}
