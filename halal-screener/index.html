@@ -261,6 +261,14 @@
             html.dark body > header {
                 color: #f0f0f0 !important;
             }
+            
+            /* Force navbar items visible on large screens */
+            @media (min-width: 1024px) {
+                .navbar-menu,
+                .navbar-social {
+                    display: inline-block !important;
+                }
+            }
         </style>
     </head>
     <body class="text-textColor dark:darktext-textColor dark:bg-emerald-800">
@@ -274,12 +282,12 @@
                 </div>
                 <!-- <a href="/index.html" to="/" class="pl-8"> Kenan Giray Erol </a> -->
                 <div class="flex-grow"></div>
-                <div class="navbar-menu inline-block flex items-center">
+                <div class="navbar-menu hidden lg:inline-block flex items-center">
                     <!---portfolio contact research also add a contact me ting-->
                     <a href="/projects.html" class="pl-8 py-2"> Projects </a>
                     <!-- <a href="/research.html" class="pl-8 py-2"> Research </a> -->
                 </div>
-                <div class="navbar-social inline-block flex items-center pl-8">
+                <div class="navbar-social hidden lg:inline-block flex items-center pl-8">
                     <a href="https://linkedin.com/in/kgerol"> <div class="inline-block"><img class="h-6 lg:h-10"  src="../assets/ratio.svg" alt="linkedin"></div> </a>
 					<!-- class="h-6 lg:h-10" -->
                     <a href="https://github.com/kenan-erol"> <div class="inline-block pl-8"><img class="h-6 lg:h-10" src="../assets/git.svg" alt="github"></div> </a>
