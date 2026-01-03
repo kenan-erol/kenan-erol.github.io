@@ -1,12 +1,7 @@
 // Hanafi Halal Stock Screener - App Logic
+// Using Twelve Data API (800 free requests/day - enough for 100+ stocks)
 
-// Constants - Using Alpha Vantage (free tier: 25 requests/day, 5 per minute)
-const AV_BASE_URL = 'https://www.alphavantage.co/query';
-
-// Helper function for delays
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+const TWELVE_DATA_BASE = 'https://api.twelvedata.com';
 
 // DOM Elements
 const apiKeyInput = document.getElementById('apiKey');
@@ -20,7 +15,7 @@ const resultsDiv = document.getElementById('results');
 
 // Load saved API key on page load
 document.addEventListener('DOMContentLoaded', () => {
-    const savedKey = localStorage.getItem('fmp_api_key');
+    const savedKey = localStorage.getItem('twelvedata_api_key');
     if (savedKey) {
         apiKeyInput.value = savedKey;
         keySavedMsg.classList.remove('hidden');
@@ -31,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 saveKeyBtn.addEventListener('click', () => {
     const key = apiKeyInput.value.trim();
     if (key) {
-        localStorage.setItem('fmp_api_key', key);
+        localStorage.setItem('twelvedata_api_key', key);
         keySavedMsg.classList.remove('hidden');
     }
 });
@@ -50,11 +45,11 @@ async function analyzeStock() {
     const apiKey = apiKeyInput.value.trim();
     const ticker = tickerInput.value.trim().toUpperCase();
 
-    // Validate inputs
     if (!apiKey) {
-        showError('Please enter your Alpha Vantage API key. Get one free at alphavantage.co/support/#api-key');
+        showError('Please enter your Twelve Data API key. Get one free at twelvedata.com (800 requests/day)');
         return;
     }
+    
     if (!ticker) {
         showError('Please enter a stock ticker (e.g., AAPL, MSFT, TSM)');
         return;
@@ -67,19 +62,8 @@ async function analyzeStock() {
     analyzeBtn.disabled = true;
 
     try {
-        // Fetch data sequentially to avoid rate limits (Alpha Vantage limits 5 calls/minute on free tier)
-        const balanceSheet = await fetchBalanceSheet(ticker, apiKey);
-        
-        // Small delay to avoid rate limit
-        await delay(1000);
-        const quote = await fetchQuote(ticker, apiKey);
-        
-        await delay(1000);
-        const overview = await fetchOverview(ticker, apiKey);
-
-        // Calculate and display results
-        displayResults(ticker, balanceSheet, quote, overview);
-
+        const data = await fetchTwelveData(ticker, apiKey);
+        displayResults(ticker, data);
     } catch (error) {
         showError(error.message);
     } finally {
@@ -88,135 +72,76 @@ async function analyzeStock() {
     }
 }
 
-async function fetchBalanceSheet(ticker, apiKey) {
-    const url = `${AV_BASE_URL}?function=BALANCE_SHEET&symbol=${ticker}&apikey=${apiKey}`;
-    console.log('Fetching balance sheet from Alpha Vantage...');
+async function fetchTwelveData(ticker, apiKey) {
+    console.log('Fetching from Twelve Data...');
     
     try {
-        const response = await fetch(url);
-        console.log('Balance sheet response status:', response.status);
+        // Fetch quote (price) and balance sheet in parallel
+        const [quoteResponse, balanceSheetResponse, statisticsResponse] = await Promise.all([
+            fetch(`${TWELVE_DATA_BASE}/quote?symbol=${ticker}&apikey=${apiKey}`),
+            fetch(`${TWELVE_DATA_BASE}/balance_sheet?symbol=${ticker}&apikey=${apiKey}`),
+            fetch(`${TWELVE_DATA_BASE}/statistics?symbol=${ticker}&apikey=${apiKey}`)
+        ]);
         
-        if (!response.ok) {
-            throw new Error(`Failed to fetch balance sheet (${response.status}).`);
+        const quoteData = await quoteResponse.json();
+        const balanceSheetData = await balanceSheetResponse.json();
+        const statisticsData = await statisticsResponse.json();
+        
+        console.log('Quote data:', quoteData);
+        console.log('Balance sheet data:', balanceSheetData);
+        console.log('Statistics data:', statisticsData);
+        
+        // Check for errors
+        if (quoteData.code === 400 || quoteData.status === 'error') {
+            throw new Error(quoteData.message || `Ticker "${ticker}" not found.`);
+        }
+        if (balanceSheetData.code === 400 || balanceSheetData.status === 'error') {
+            throw new Error(balanceSheetData.message || 'Balance sheet not available.');
         }
         
-        const data = await response.json();
-        console.log('Balance sheet data:', data);
+        // Get the most recent balance sheet
+        const latestBS = balanceSheetData.balance_sheet?.[0] || {};
         
-        // Check for API error messages
-        if (data['Error Message']) {
-            throw new Error('Invalid ticker symbol.');
-        }
-        
-        if (data['Note']) {
-            throw new Error('API rate limit reached. Free tier allows 25 requests/day. Try again tomorrow or get a premium key.');
-        }
-        
-        if (data['Information']) {
-            throw new Error(data['Information']);
-        }
-        
-        if (!data.quarterlyReports || data.quarterlyReports.length === 0) {
-            throw new Error(`No balance sheet data for "${ticker}".`);
-        }
-        
-        // Return the most recent quarterly report
-        return data.quarterlyReports[0];
+        return {
+            quote: quoteData,
+            balanceSheet: latestBS,
+            statistics: statisticsData.statistics || {}
+        };
     } catch (error) {
         console.error('Fetch error:', error);
         throw error;
     }
 }
 
-async function fetchQuote(ticker, apiKey) {
-    const url = `${AV_BASE_URL}?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${apiKey}`;
-    console.log('Fetching quote from Alpha Vantage...');
+function displayResults(ticker, data) {
+    const quote = data.quote;
+    const bs = data.balanceSheet;
+    const stats = data.statistics;
     
-    try {
-        const response = await fetch(url);
-        console.log('Quote response status:', response.status);
-        
-        if (!response.ok) {
-            throw new Error(`Failed to fetch quote (${response.status}).`);
-        }
-        
-        const data = await response.json();
-        console.log('Quote data:', data);
-        
-        if (data['Error Message']) {
-            throw new Error('Invalid ticker symbol.');
-        }
-        
-        if (data['Note']) {
-            throw new Error('API rate limit reached (25/day). Try again tomorrow.');
-        }
-        
-        // Check for rate limit message in Information field
-        if (data['Information'] && data['Information'].includes('rate limit')) {
-            throw new Error('API rate limit reached. Wait 1 minute and try again (free tier: 5 calls/minute).');
-        }
-        
-        if (!data['Global Quote'] || !data['Global Quote']['05. price']) {
-            throw new Error(`No quote data for "${ticker}". Wait 1 minute and try again.`);
-        }
-        
-        return data['Global Quote'];
-    } catch (error) {
-        console.error('Fetch error:', error);
-        throw error;
-    }
-}
-
-async function fetchOverview(ticker, apiKey) {
-    const url = `${AV_BASE_URL}?function=OVERVIEW&symbol=${ticker}&apikey=${apiKey}`;
-    console.log('Fetching company overview from Alpha Vantage...');
-    
-    try {
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-            throw new Error(`Failed to fetch overview (${response.status}).`);
-        }
-        
-        const data = await response.json();
-        console.log('Overview data:', data);
-        
-        if (data['Note']) {
-            throw new Error('API rate limit reached (25/day). Try again tomorrow.');
-        }
-        
-        // Check for rate limit message in Information field
-        if (data['Information'] && data['Information'].includes('rate limit')) {
-            throw new Error('API rate limit reached. Wait 1 minute and try again (free tier: 5 calls/minute).');
-        }
-        
-        return data;
-    } catch (error) {
-        console.error('Fetch error:', error);
-        throw error;
-    }
-}
-
-function displayResults(ticker, bs, quote, overview) {
-    // Alpha Vantage field names are different - extract values from balance sheet
-    // Note: Alpha Vantage returns values as strings
-    const totalAssets = parseFloat(bs.totalAssets) || 0;
-    const cash = parseFloat(bs.cashAndCashEquivalentsAtCarryingValue) || 0;
-    const receivables = parseFloat(bs.currentNetReceivables) || 0;
-    const totalLiabilities = parseFloat(bs.totalLiabilities) || 0;
-    const shortTermDebt = parseFloat(bs.shortTermDebt) || 0;
-    const longTermDebt = parseFloat(bs.longTermDebt) || 0;
+    // Extract values from Twelve Data format
+    const totalAssets = parseFloat(bs.assets?.total_assets) || 0;
+    const cash = parseFloat(bs.assets?.current_assets?.cash_and_cash_equivalents) || 0;
+    const shortTermInvestments = parseFloat(bs.assets?.current_assets?.short_term_investments) || 0;
+    const receivables = parseFloat(bs.assets?.current_assets?.accounts_receivable) || 0;
+    const totalLiabilities = parseFloat(bs.liabilities?.total_liabilities) || 0;
+    const shortTermDebt = parseFloat(bs.liabilities?.current_liabilities?.short_term_debt) || 0;
+    const longTermDebt = parseFloat(bs.liabilities?.non_current_liabilities?.long_term_debt) || 0;
     const totalDebt = shortTermDebt + longTermDebt;
     
-    // Extract values from quote (Alpha Vantage format)
-    const price = parseFloat(quote['05. price']) || 0;
+    const currentPrice = parseFloat(quote.close) || parseFloat(quote.price) || 0;
+    const sharesOutstanding = parseFloat(stats.shares_outstanding) || parseFloat(stats.statistics?.shares_outstanding) || 1;
+    const companyName = quote.name || ticker;
     
-    // Extract from overview
-    const sharesOutstanding = parseFloat(overview.SharesOutstanding) || 1;
-    const companyName = overview.Name || ticker;
+    // Include short-term investments in liquid assets
+    const liquidCash = cash + shortTermInvestments;
+    
+    console.log('Extracted values:', {
+        totalAssets, cash: liquidCash, receivables, totalLiabilities, totalDebt, 
+        currentPrice, sharesOutstanding, companyName
+    });
     
     // Calculate liquid and illiquid assets
-    const liquidAssets = cash + receivables;
+    const liquidAssets = liquidCash + receivables;
     const illiquidAssets = totalAssets - liquidAssets;
     
     // Yahoo Finance link for verification
@@ -229,8 +154,8 @@ function displayResults(ticker, bs, quote, overview) {
     document.getElementById('check1Status').textContent = check1Pass ? 'PASS' : 'FAIL';
     document.getElementById('check1Status').className = `check-status ${check1Pass ? 'pass' : 'fail'}`;
     document.getElementById('check1Formula').innerHTML = `
-        Illiquid Assets = Total Assets - (Cash + Receivables)<br>
-        Illiquid Assets = ${formatCurrency(totalAssets)} - (${formatCurrency(cash)} + ${formatCurrency(receivables)})<br>
+        Illiquid Assets = Total Assets - (Cash + Short-term Investments + Receivables)<br>
+        Illiquid Assets = ${formatCurrency(totalAssets)} - (${formatCurrency(liquidCash)} + ${formatCurrency(receivables)})<br>
         Illiquid Assets = ${formatCurrency(illiquidAssets)}<br><br>
         Ratio = ${formatCurrency(illiquidAssets)} / ${formatCurrency(totalAssets)} = <strong>${(illiquidRatio * 100).toFixed(2)}%</strong>
     `;
@@ -238,21 +163,21 @@ function displayResults(ticker, bs, quote, overview) {
     
     // --- CHECK 2: Net Liquid Assets vs Price ---
     const netLiquidAssets = liquidAssets - totalLiabilities;
-    const netLiquidPerShare = netLiquidAssets / sharesOutstanding;
+    const netLiquidPerShare = sharesOutstanding > 0 ? (netLiquidAssets / sharesOutstanding) : 0;
     // If net liquid is negative, it automatically passes (you're paying for the business, not just cash)
-    const check2Pass = netLiquidPerShare < 0 || price > netLiquidPerShare;
+    const check2Pass = netLiquidPerShare < 0 || currentPrice > netLiquidPerShare;
     
     document.getElementById('check2Status').textContent = check2Pass ? 'PASS' : 'FAIL';
     document.getElementById('check2Status').className = `check-status ${check2Pass ? 'pass' : 'fail'}`;
     document.getElementById('check2Formula').innerHTML = `
         Net Liquid Assets = (Cash + Receivables) - Total Liabilities<br>
-        Net Liquid Assets = (${formatCurrency(cash)} + ${formatCurrency(receivables)}) - ${formatCurrency(totalLiabilities)}<br>
+        Net Liquid Assets = (${formatCurrency(liquidCash)} + ${formatCurrency(receivables)}) - ${formatCurrency(totalLiabilities)}<br>
         Net Liquid Assets = ${formatCurrency(netLiquidAssets)}<br><br>
         Per Share = ${formatCurrency(netLiquidAssets)} / ${formatNumber(sharesOutstanding)} shares = <strong>$${netLiquidPerShare.toFixed(2)}</strong><br>
-        Stock Price = <strong>$${price.toFixed(2)}</strong><br><br>
+        Stock Price = <strong>$${currentPrice.toFixed(2)}</strong><br><br>
         ${netLiquidPerShare < 0 
             ? '✓ Net liquid is negative, so no risk of buying cash surplus.' 
-            : `${price > netLiquidPerShare ? '✓' : '✗'} Price ($${price.toFixed(2)}) ${price > netLiquidPerShare ? '>' : '≤'} Net Liquid/Share ($${netLiquidPerShare.toFixed(2)})`
+            : `${currentPrice > netLiquidPerShare ? '✓' : '✗'} Price ($${currentPrice.toFixed(2)}) ${currentPrice > netLiquidPerShare ? '>' : '≤'} Net Liquid/Share ($${netLiquidPerShare.toFixed(2)})`
         }
     `;
     document.getElementById('check2Link').href = yahooLink;
@@ -265,8 +190,8 @@ function displayResults(ticker, bs, quote, overview) {
     document.getElementById('check3Status').className = `check-status ${check3Pass ? 'pass' : 'fail'}`;
     document.getElementById('check3Formula').innerHTML = `
         Debt Ratio = Total Debt / Total Assets<br>
-        Debt Ratio = ${formatCurrency(totalDebt)} / ${formatCurrency(totalAssets)}<br>
-        Debt Ratio = <strong>${(debtRatio * 100).toFixed(2)}%</strong>
+        Debt Ratio = (${formatCurrency(shortTermDebt)} + ${formatCurrency(longTermDebt)}) / ${formatCurrency(totalAssets)}<br>
+        Debt Ratio = ${formatCurrency(totalDebt)} / ${formatCurrency(totalAssets)} = <strong>${(debtRatio * 100).toFixed(2)}%</strong>
     `;
     document.getElementById('check3Link').href = yahooLink;
     
@@ -280,7 +205,7 @@ function displayResults(ticker, bs, quote, overview) {
     
     // Update header
     document.getElementById('stockName').textContent = `${ticker} - ${companyName}`;
-    document.getElementById('stockPrice').textContent = `$${price.toFixed(2)}`;
+    document.getElementById('stockPrice').textContent = `$${currentPrice.toFixed(2)}`;
     
     // Show results
     resultsDiv.classList.remove('hidden');
@@ -293,32 +218,30 @@ function showError(message) {
 }
 
 function formatCurrency(num) {
-    if (num >= 1e12) {
-        return `$${(num / 1e12).toFixed(2)}T`;
-    } else if (num >= 1e9) {
-        return `$${(num / 1e9).toFixed(2)}B`;
-    } else if (num >= 1e6) {
-        return `$${(num / 1e6).toFixed(2)}M`;
-    } else if (num >= 1e3) {
-        return `$${(num / 1e3).toFixed(2)}K`;
-    } else if (num < 0) {
-        // Handle negative numbers
-        const absNum = Math.abs(num);
-        if (absNum >= 1e12) {
-            return `-$${(absNum / 1e12).toFixed(2)}T`;
-        } else if (absNum >= 1e9) {
-            return `-$${(absNum / 1e9).toFixed(2)}B`;
-        } else if (absNum >= 1e6) {
-            return `-$${(absNum / 1e6).toFixed(2)}M`;
-        } else if (absNum >= 1e3) {
-            return `-$${(absNum / 1e3).toFixed(2)}K`;
-        }
-        return `-$${absNum.toFixed(2)}`;
+    if (num === undefined || num === null || isNaN(num)) {
+        return '$0.00';
     }
-    return `$${num.toFixed(2)}`;
+    
+    const absNum = Math.abs(num);
+    const sign = num < 0 ? '-' : '';
+    
+    if (absNum >= 1e12) {
+        return `${sign}$${(absNum / 1e12).toFixed(2)}T`;
+    } else if (absNum >= 1e9) {
+        return `${sign}$${(absNum / 1e9).toFixed(2)}B`;
+    } else if (absNum >= 1e6) {
+        return `${sign}$${(absNum / 1e6).toFixed(2)}M`;
+    } else if (absNum >= 1e3) {
+        return `${sign}$${(absNum / 1e3).toFixed(2)}K`;
+    }
+    return `${sign}$${absNum.toFixed(2)}`;
 }
 
 function formatNumber(num) {
+    if (num === undefined || num === null || isNaN(num)) {
+        return '0';
+    }
+    
     if (num >= 1e9) {
         return `${(num / 1e9).toFixed(2)}B`;
     } else if (num >= 1e6) {
