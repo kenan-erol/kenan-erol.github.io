@@ -133,6 +133,28 @@
                 font-size: 0.85rem;
                 overflow-x: auto;
             }
+            .field-mapping {
+                background: #0d9488;
+                padding: 0.75rem;
+                border-radius: 0.25rem;
+                margin-bottom: 0.5rem;
+                line-height: 1.6;
+            }
+            .field-label {
+                font-weight: bold;
+                color: #ffffff;
+            }
+            .yahoo-field {
+                color: #a7f3d0;
+                font-size: 0.8rem;
+                font-style: italic;
+            }
+            .calculation-box {
+                background: #065f46;
+                padding: 0.5rem;
+                border-radius: 0.25rem;
+                line-height: 1.5;
+            }
             .verify-link {
                 color: #6ee7b7;
                 text-decoration: underline;
@@ -203,24 +225,82 @@
         <header class="sticky top-0 z-50 w-full shadow-md bg-white dark:bg-emerald-900 text-textColor dark:darktext-textColor text-sm">
             <div class="flex items-center lg:mx-10 mx-6 py-4">
                 <div>
-                    <a key="home" href="/index.html">Home</a>
+                    <a key="home" href="/index.html">
+                        <!-- <img class="h-6 lg:h-10" src="../assets/kenanhead1.png" alt="Kenan Erol"> -->
+						Home
+                    </a>
                 </div>
+                <!-- <a href="/index.html" to="/" class="pl-8"> Kenan Giray Erol </a> -->
                 <div class="flex-grow"></div>
                 <div class="navbar-menu hidden lg:inline-block flex items-center">
+                    <!---portfolio contact research also add a contact me ting-->
                     <a href="/projects.html" class="pl-8 py-2"> Projects </a>
+                    <!-- <a href="/research.html" class="pl-8 py-2"> Research </a> -->
                 </div>
                 <div class="navbar-social hidden lg:inline-block flex items-center pl-8">
-                    <a href="https://linkedin.com/in/kgerol"> <div class="inline-block"><img class="h-6 lg:h-10" src="../assets/ratio.svg" alt="linkedin"></div> </a>
+                    <a href="https://linkedin.com/in/kgerol"> <div class="inline-block"><img class="h-6 lg:h-10"  src="../assets/ratio.svg" alt="linkedin"></div> </a>
+					<!-- class="h-6 lg:h-10" -->
                     <a href="https://github.com/kenan-erol"> <div class="inline-block pl-8"><img class="h-6 lg:h-10" src="../assets/git.svg" alt="github"></div> </a>
                     <a href="https://devpost.com/kenan-erol"> <div class="inline-block pl-8"><img class="h-6 lg:h-10" src="../assets/devpost.svg" alt="Devpost"></div> </a>
+                    <!-- <a href="https://instagram.com/kenan_giray10/"> <div class="inline-block pl-8"><img class="h-6 lg:h-10" src="../assets/instagram-color-svgrepo-com.svg" alt="Kenan Erol"></div> </a> -->
                 </div>
-            </div>
+                <!---mobile-->
+                <div class="lg:hidden">
+                    <button id="menuToggle" aria-label="menu" class="block focus:outline-none">
+                        <div class="menu-toggle h-6 w-6">
+                            <!-- <svg class="stroke-textColor dark:stroke-textColor"  viewBox="0 0 20 20" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                                <line class="top" x1="0" y1="2" x2="20" y2="2" style="stroke-width: 2"></line>
+                                <line class="middle" x1="0" y1="10" x2="20" y2="10" style="stroke-width: 2"></line>
+                                <line class="bottom" x1="0" y1="18" x2="20" y2="18" style="stroke-width: 2"></line>
+                            </svg> -->
+                            <div id="nav-icon3">
+                                <span class="stroke-textDarkColor dark:stroke-textColor"></span>
+                                <span class="stroke-textDarkColor dark:stroke-textColor"></span>
+                                <span class="stroke-textDarkColor dark:stroke-textColor"></span>
+                                <span class="stroke-textDarkColor dark:stroke-textColor"></span>
+                              </div>
+                        </div>
+                        </div>
+                    </button>
+                </div>
+                
+                <div id="mobileMenu" class="mobile-menu hidden block border-t mx-6 py-8">
+                    <div class="text-center"><a href="/projects.html" class="block py-8"> Projects </a>
+                    <!-- <a href="/research.html" class="block py-2"> Research </a></div> -->
+                    <div class="flex justify-center">
+                        <a href="https://linkedin.com/in/kgerol"> <div class="block py-8"><img class="h-6 lg:h-10" src="../assets/linkedin-svgrepo-com.svg" alt="linkedin"></div> </a>
+                        <a href="https://github.com/kenan-erol"> <div class="block py-8 pl-8"><img class="h-6 lg:h-10" src="../assets/git.svg" alt="github"></div> </a> </div>
+                    <div class="flex justify-center">
+						<a href="https://devpost.com/kenan-erol"> <div class="block py-4"><img class="h-6 lg:h-10" src="../assets/devpost.svg" alt="Devpost"></div> </a>
+                        <a href="https://instagram.com/kenan_giray10/">
+						<div class="block py-4 pl-8"><img class="h-6 lg:h-10" src="../assets/instagram-color-svgrepo-com.svg" alt="Kenan Erol"></div> </a>
+                    </div>
+                </div>
+                
+                <script>
+                    const menuToggle = document.getElementById('nav-icon3');
+                    const mobileMenu = document.getElementById('mobileMenu');
+                
+                    menuToggle.addEventListener('click', function() {
+                        //console.log('clicked');
+                        mobileMenu.classList.toggle('hidden');
+                        //$(this).toggleClass('open');
+                        menuToggle.classList.toggle('open');
+                    });
+
+                    /*$(document).ready(function(){
+                        $('#nav-icon3').click(function(){
+                            $(this).toggleClass('open');
+                        });
+                    });*/
+                </script>
+                
         </header>
         
         <main class="relative min-h-screen">
             <div class="screener-container">
                 <h1 class="text-3xl font-bold mb-2">Strict Hanafi Halal Stock Screener</h1>
-                <p class="mb-4 text-emerald-200">Check if a stock meets strict Hanafi Shariah compliance criteria</p>
+                <p class="mb-4">Check if a stock meets strict Hanafi Shariah compliance criteria</p>
                 
                 <div class="info-box">
                     <p><strong>What this checks:</strong></p>

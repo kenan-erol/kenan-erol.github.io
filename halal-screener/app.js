@@ -102,10 +102,13 @@ async function fetchTwelveData(ticker, apiKey) {
         // Get the most recent balance sheet
         const latestBS = balanceSheetData.balance_sheet?.[0] || {};
         
+        // Debug: log full statistics structure
+        console.log('Full statistics response:', JSON.stringify(statisticsData, null, 2));
+        
         return {
             quote: quoteData,
             balanceSheet: latestBS,
-            statistics: statisticsData.statistics || {}
+            statistics: statisticsData.statistics || statisticsData || {}
         };
     } catch (error) {
         console.error('Fetch error:', error);
@@ -129,8 +132,16 @@ function displayResults(ticker, data) {
     const totalDebt = shortTermDebt + longTermDebt;
     
     const currentPrice = parseFloat(quote.close) || parseFloat(quote.price) || 0;
-    const sharesOutstanding = parseFloat(stats.shares_outstanding) || parseFloat(stats.statistics?.shares_outstanding) || 1;
+    // Try multiple paths for shares outstanding
+    const sharesOutstanding = parseFloat(stats.shares_outstanding) || 
+                              parseFloat(stats.shares_basic_outstanding) ||
+                              parseFloat(stats.valuations_metrics?.shares_outstanding) ||
+                              parseFloat(stats.stock_statistics?.shares_outstanding) ||
+                              parseFloat(quote.shares_outstanding) || 
+                              1;
     const companyName = quote.name || ticker;
+    
+    console.log('Shares outstanding raw:', stats.shares_outstanding, stats);
     
     // Include short-term investments in liquid assets
     const liquidCash = cash + shortTermInvestments;
@@ -154,10 +165,18 @@ function displayResults(ticker, data) {
     document.getElementById('check1Status').textContent = check1Pass ? 'PASS' : 'FAIL';
     document.getElementById('check1Status').className = `check-status ${check1Pass ? 'pass' : 'fail'}`;
     document.getElementById('check1Formula').innerHTML = `
-        Illiquid Assets = Total Assets - (Cash + Short-term Investments + Receivables)<br>
-        Illiquid Assets = ${formatCurrency(totalAssets)} - (${formatCurrency(liquidCash)} + ${formatCurrency(receivables)})<br>
-        Illiquid Assets = ${formatCurrency(illiquidAssets)}<br><br>
-        Ratio = ${formatCurrency(illiquidAssets)} / ${formatCurrency(totalAssets)} = <strong>${(illiquidRatio * 100).toFixed(2)}%</strong>
+        <div class="field-mapping">
+            <span class="field-label">Total Assets</span> <span class="yahoo-field">(Yahoo: "Total Assets")</span>: <strong>${formatCurrency(totalAssets)}</strong><br>
+            <span class="field-label">Cash & Equivalents</span> <span class="yahoo-field">(Yahoo: "Cash And Cash Equivalents")</span>: <strong>${formatCurrency(cash)}</strong><br>
+            <span class="field-label">Short-term Investments</span> <span class="yahoo-field">(Yahoo: "Other Short Term Investments")</span>: <strong>${formatCurrency(shortTermInvestments)}</strong><br>
+            <span class="field-label">Receivables</span> <span class="yahoo-field">(Yahoo: "Receivables")</span>: <strong>${formatCurrency(receivables)}</strong>
+        </div>
+        <div class="calculation-box">
+            Illiquid Assets = Total Assets - (Cash + Short-term Investments + Receivables)<br>
+            Illiquid Assets = ${formatCurrency(totalAssets)} - (${formatCurrency(cash)} + ${formatCurrency(shortTermInvestments)} + ${formatCurrency(receivables)})<br>
+            Illiquid Assets = ${formatCurrency(illiquidAssets)}<br><br>
+            <strong>Ratio = ${(illiquidRatio * 100).toFixed(2)}%</strong> (must be ≥ 20%)
+        </div>
     `;
     document.getElementById('check1Link').href = yahooLink;
     
@@ -170,15 +189,23 @@ function displayResults(ticker, data) {
     document.getElementById('check2Status').textContent = check2Pass ? 'PASS' : 'FAIL';
     document.getElementById('check2Status').className = `check-status ${check2Pass ? 'pass' : 'fail'}`;
     document.getElementById('check2Formula').innerHTML = `
-        Net Liquid Assets = (Cash + Receivables) - Total Liabilities<br>
-        Net Liquid Assets = (${formatCurrency(liquidCash)} + ${formatCurrency(receivables)}) - ${formatCurrency(totalLiabilities)}<br>
-        Net Liquid Assets = ${formatCurrency(netLiquidAssets)}<br><br>
-        Per Share = ${formatCurrency(netLiquidAssets)} / ${formatNumber(sharesOutstanding)} shares = <strong>$${netLiquidPerShare.toFixed(2)}</strong><br>
-        Stock Price = <strong>$${currentPrice.toFixed(2)}</strong><br><br>
-        ${netLiquidPerShare < 0 
-            ? '✓ Net liquid is negative, so no risk of buying cash surplus.' 
-            : `${currentPrice > netLiquidPerShare ? '✓' : '✗'} Price ($${currentPrice.toFixed(2)}) ${currentPrice > netLiquidPerShare ? '>' : '≤'} Net Liquid/Share ($${netLiquidPerShare.toFixed(2)})`
-        }
+        <div class="field-mapping">
+            <span class="field-label">Cash + Investments</span>: <strong>${formatCurrency(liquidCash)}</strong><br>
+            <span class="field-label">Receivables</span> <span class="yahoo-field">(Yahoo: "Receivables")</span>: <strong>${formatCurrency(receivables)}</strong><br>
+            <span class="field-label">Total Liabilities</span> <span class="yahoo-field">(Yahoo: "Total Liabilities Net Minority Interest")</span>: <strong>${formatCurrency(totalLiabilities)}</strong><br>
+            <span class="field-label">Shares Outstanding</span> <span class="yahoo-field">(Yahoo: Statistics → "Shares Outstanding")</span>: <strong>${formatNumber(sharesOutstanding)}</strong>
+        </div>
+        <div class="calculation-box">
+            Net Liquid Assets = (Cash + Investments + Receivables) - Total Liabilities<br>
+            Net Liquid Assets = (${formatCurrency(liquidCash)} + ${formatCurrency(receivables)}) - ${formatCurrency(totalLiabilities)}<br>
+            Net Liquid Assets = ${formatCurrency(netLiquidAssets)}<br><br>
+            Per Share = ${formatCurrency(netLiquidAssets)} ÷ ${formatNumber(sharesOutstanding)} = <strong>$${netLiquidPerShare.toFixed(2)}</strong><br>
+            Stock Price = <strong>$${currentPrice.toFixed(2)}</strong><br><br>
+            ${netLiquidPerShare < 0 
+                ? '✓ Net liquid is negative, so no risk of buying cash surplus.' 
+                : `${currentPrice > netLiquidPerShare ? '✓' : '✗'} Price ($${currentPrice.toFixed(2)}) ${currentPrice > netLiquidPerShare ? '>' : '≤'} Net Liquid/Share ($${netLiquidPerShare.toFixed(2)})`
+            }
+        </div>
     `;
     document.getElementById('check2Link').href = yahooLink;
     
@@ -189,9 +216,16 @@ function displayResults(ticker, data) {
     document.getElementById('check3Status').textContent = check3Pass ? 'PASS' : 'FAIL';
     document.getElementById('check3Status').className = `check-status ${check3Pass ? 'pass' : 'fail'}`;
     document.getElementById('check3Formula').innerHTML = `
-        Debt Ratio = Total Debt / Total Assets<br>
-        Debt Ratio = (${formatCurrency(shortTermDebt)} + ${formatCurrency(longTermDebt)}) / ${formatCurrency(totalAssets)}<br>
-        Debt Ratio = ${formatCurrency(totalDebt)} / ${formatCurrency(totalAssets)} = <strong>${(debtRatio * 100).toFixed(2)}%</strong>
+        <div class="field-mapping">
+            <span class="field-label">Current Debt</span> <span class="yahoo-field">(Yahoo: "Current Debt")</span>: <strong>${formatCurrency(shortTermDebt)}</strong><br>
+            <span class="field-label">Long-term Debt</span> <span class="yahoo-field">(Yahoo: "Long Term Debt")</span>: <strong>${formatCurrency(longTermDebt)}</strong><br>
+            <span class="field-label">Total Assets</span> <span class="yahoo-field">(Yahoo: "Total Assets")</span>: <strong>${formatCurrency(totalAssets)}</strong>
+        </div>
+        <div class="calculation-box">
+            Total Debt = Current Debt + Long-term Debt<br>
+            Total Debt = ${formatCurrency(shortTermDebt)} + ${formatCurrency(longTermDebt)} = ${formatCurrency(totalDebt)}<br><br>
+            <strong>Debt Ratio = ${(debtRatio * 100).toFixed(2)}%</strong> (must be < 37%)
+        </div>
     `;
     document.getElementById('check3Link').href = yahooLink;
     
