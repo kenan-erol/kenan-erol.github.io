@@ -1,7 +1,20 @@
 // Hanafi Halal Stock Screener - App Logic
-// Using Twelve Data API (800 free requests/day - enough for 100+ stocks)
+// Using Alpha Vantage API - Free tier with balance sheet access
+// Get your free API key at: https://www.alphavantage.co/support/#api-key
 
-const TWELVE_DATA_BASE = 'https://api.twelvedata.com';
+const AV_BASE = 'https://www.alphavantage.co/query';
+
+// Alpha Vantage Rate Limits (Free tier)
+const REQUESTS_PER_MINUTE = 5;
+const REQUESTS_PER_DAY = 25;
+const REQUESTS_PER_ANALYSIS = 3; // We make 3 API calls per stock analysis
+const COOLDOWN_SECONDS = 15; // Wait time between analyses to avoid rate limit
+
+// Rate limiting state
+let lastAnalysisTime = 0;
+let cooldownInterval = null;
+let dailyRequestCount = parseInt(localStorage.getItem('av_daily_requests') || '0');
+let dailyRequestDate = localStorage.getItem('av_daily_date') || '';
 
 // DOM Elements
 const apiKeyInput = document.getElementById('apiKey');
@@ -12,21 +25,99 @@ const analyzeBtn = document.getElementById('analyzeBtn');
 const loadingDiv = document.getElementById('loading');
 const errorDiv = document.getElementById('error');
 const resultsDiv = document.getElementById('results');
+const cooldownTimer = document.getElementById('cooldownTimer');
+const requestCounter = document.getElementById('requestCounter');
+
+// Check if it's a new day and reset counter
+function checkDailyReset() {
+    const today = new Date().toDateString();
+    if (dailyRequestDate !== today) {
+        dailyRequestCount = 0;
+        dailyRequestDate = today;
+        localStorage.setItem('av_daily_requests', '0');
+        localStorage.setItem('av_daily_date', today);
+    }
+}
+
+// Update the request counter display
+function updateRequestCounter() {
+    checkDailyReset();
+    const analysesRemaining = Math.floor((REQUESTS_PER_DAY - dailyRequestCount) / REQUESTS_PER_ANALYSIS);
+    if (requestCounter) {
+        requestCounter.textContent = `${analysesRemaining} analyses remaining today (${dailyRequestCount}/${REQUESTS_PER_DAY} API calls used)`;
+        requestCounter.className = analysesRemaining <= 2 ? 'request-counter warning' : 'request-counter';
+    }
+}
+
+// Increment request count
+function incrementRequestCount(count = 1) {
+    dailyRequestCount += count;
+    localStorage.setItem('av_daily_requests', dailyRequestCount.toString());
+    updateRequestCounter();
+}
+
+// Start cooldown timer
+function startCooldown() {
+    lastAnalysisTime = Date.now();
+    let remaining = COOLDOWN_SECONDS;
+    
+    if (cooldownTimer) {
+        cooldownTimer.classList.remove('hidden');
+        cooldownTimer.textContent = `⏳ Cooldown: ${remaining}s (rate limit protection)`;
+    }
+    analyzeBtn.disabled = true;
+    
+    cooldownInterval = setInterval(() => {
+        remaining--;
+        if (remaining <= 0) {
+            clearInterval(cooldownInterval);
+            cooldownInterval = null;
+            if (cooldownTimer) {
+                cooldownTimer.classList.add('hidden');
+            }
+            analyzeBtn.disabled = false;
+        } else {
+            if (cooldownTimer) {
+                cooldownTimer.textContent = `⏳ Cooldown: ${remaining}s (rate limit protection)`;
+            }
+        }
+    }, 1000);
+}
+
+// Check if we can make a request
+function canMakeRequest() {
+    checkDailyReset();
+    
+    // Check daily limit
+    if (dailyRequestCount + REQUESTS_PER_ANALYSIS > REQUESTS_PER_DAY) {
+        return { allowed: false, reason: `Daily limit reached (${REQUESTS_PER_DAY} requests). Try again tomorrow or upgrade your API plan.` };
+    }
+    
+    // Check cooldown
+    const timeSinceLastAnalysis = Date.now() - lastAnalysisTime;
+    const cooldownRemaining = Math.ceil((COOLDOWN_SECONDS * 1000 - timeSinceLastAnalysis) / 1000);
+    if (cooldownRemaining > 0) {
+        return { allowed: false, reason: `Please wait ${cooldownRemaining} seconds before next analysis.` };
+    }
+    
+    return { allowed: true };
+}
 
 // Load saved API key on page load
 document.addEventListener('DOMContentLoaded', () => {
-    const savedKey = localStorage.getItem('twelvedata_api_key');
+    const savedKey = localStorage.getItem('alphavantage_api_key');
     if (savedKey) {
         apiKeyInput.value = savedKey;
         keySavedMsg.classList.remove('hidden');
     }
+    updateRequestCounter();
 });
 
 // Save API key to localStorage
 saveKeyBtn.addEventListener('click', () => {
     const key = apiKeyInput.value.trim();
     if (key) {
-        localStorage.setItem('twelvedata_api_key', key);
+        localStorage.setItem('alphavantage_api_key', key);
         keySavedMsg.classList.remove('hidden');
     }
 });
@@ -46,12 +137,19 @@ async function analyzeStock() {
     const ticker = tickerInput.value.trim().toUpperCase();
 
     if (!apiKey) {
-        showError('Please enter your Twelve Data API key. Get one free at twelvedata.com (800 requests/day)');
+        showError('Please enter your Alpha Vantage API key. Get one free at alphavantage.co');
         return;
     }
     
     if (!ticker) {
-        showError('Please enter a stock ticker (e.g., AAPL, MSFT, TSM)');
+        showError('Please enter a stock ticker (e.g., AAPL, MSFT, GOOGL)');
+        return;
+    }
+    
+    // Check rate limits
+    const rateCheck = canMakeRequest();
+    if (!rateCheck.allowed) {
+        showError(rateCheck.reason);
         return;
     }
 
@@ -62,53 +160,98 @@ async function analyzeStock() {
     analyzeBtn.disabled = true;
 
     try {
-        const data = await fetchTwelveData(ticker, apiKey);
+        const data = await fetchAlphaVantageData(ticker, apiKey);
         displayResults(ticker, data);
+        // Start cooldown after successful analysis
+        startCooldown();
     } catch (error) {
         showError(error.message);
+        // Still start cooldown to prevent hammering API on errors
+        if (!error.message.includes('not found')) {
+            startCooldown();
+        } else {
+            analyzeBtn.disabled = false;
+        }
     } finally {
         loadingDiv.classList.add('hidden');
-        analyzeBtn.disabled = false;
     }
 }
 
-async function fetchTwelveData(ticker, apiKey) {
-    console.log('Fetching from Twelve Data...');
+async function fetchAlphaVantageData(ticker, apiKey) {
+    console.log('Fetching from Alpha Vantage...');
+    
+    // Helper function to wait between requests (Alpha Vantage requires 1 request per second on free tier)
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    
+    // Update loading message helper
+    const updateLoadingMessage = (message) => {
+        const loadingP = loadingDiv.querySelector('p');
+        if (loadingP) loadingP.textContent = message;
+    };
     
     try {
-        // Fetch quote (price) and balance sheet in parallel
-        const [quoteResponse, balanceSheetResponse, statisticsResponse] = await Promise.all([
-            fetch(`${TWELVE_DATA_BASE}/quote?symbol=${ticker}&apikey=${apiKey}`),
-            fetch(`${TWELVE_DATA_BASE}/balance_sheet?symbol=${ticker}&apikey=${apiKey}`),
-            fetch(`${TWELVE_DATA_BASE}/statistics?symbol=${ticker}&apikey=${apiKey}`)
-        ]);
+        // Fetch balance sheet, overview (for shares outstanding & price), and quote
+        // Note: Free tier requires spacing out requests (1 per second)
         
-        const quoteData = await quoteResponse.json();
+        // First get the company overview (includes shares outstanding)
+        updateLoadingMessage('⏳ Fetching company overview (1/3)...');
+        const overviewResponse = await fetch(
+            `${AV_BASE}?function=OVERVIEW&symbol=${ticker}&apikey=${apiKey}`
+        );
+        const overviewData = await overviewResponse.json();
+        console.log('Overview data:', overviewData);
+        incrementRequestCount(1);
+        
+        // Check for API errors or rate limits
+        if (overviewData.Note || overviewData.Information) {
+            throw new Error('API rate limit reached. Please wait a minute and try again. (Free tier: 1 request/second, 25/day)');
+        }
+        if (overviewData['Error Message']) {
+            throw new Error(overviewData['Error Message']);
+        }
+        if (!overviewData.Symbol) {
+            throw new Error(`Ticker "${ticker}" not found or no data available.`);
+        }
+        
+        // Wait 1.5 seconds before next request to respect rate limit
+        updateLoadingMessage('⏳ Waiting for API rate limit (1.5s)...');
+        await delay(1500);
+        
+        // Get balance sheet data
+        updateLoadingMessage('⏳ Fetching balance sheet (2/3)...');
+        const balanceSheetResponse = await fetch(
+            `${AV_BASE}?function=BALANCE_SHEET&symbol=${ticker}&apikey=${apiKey}`
+        );
         const balanceSheetData = await balanceSheetResponse.json();
-        const statisticsData = await statisticsResponse.json();
-        
-        console.log('Quote data:', quoteData);
         console.log('Balance sheet data:', balanceSheetData);
-        console.log('Statistics data:', statisticsData);
+        incrementRequestCount(1);
         
-        // Check for errors
-        if (quoteData.code === 400 || quoteData.status === 'error') {
-            throw new Error(quoteData.message || `Ticker "${ticker}" not found.`);
+        // Check for rate limit message
+        if (balanceSheetData.Note || balanceSheetData.Information) {
+            throw new Error('API rate limit reached. Please wait a minute and try again.');
         }
-        if (balanceSheetData.code === 400 || balanceSheetData.status === 'error') {
-            throw new Error(balanceSheetData.message || 'Balance sheet not available.');
+        if (!balanceSheetData.annualReports || balanceSheetData.annualReports.length === 0) {
+            throw new Error(`Balance sheet not available for "${ticker}". This stock may be too new or delisted.`);
         }
         
-        // Get the most recent balance sheet
-        const latestBS = balanceSheetData.balance_sheet?.[0] || {};
+        // Wait 1.5 seconds before next request
+        updateLoadingMessage('⏳ Waiting for API rate limit (1.5s)...');
+        await delay(1500);
         
-        // Debug: log full statistics structure
-        console.log('Full statistics response:', JSON.stringify(statisticsData, null, 2));
+        // Get current stock quote for price
+        updateLoadingMessage('⏳ Fetching stock quote (3/3)...');
+        const quoteResponse = await fetch(
+            `${AV_BASE}?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${apiKey}`
+        );
+        const quoteData = await quoteResponse.json();
+        console.log('Quote data:', quoteData);
+        incrementRequestCount(1);
         
         return {
-            quote: quoteData,
-            balanceSheet: latestBS,
-            statistics: statisticsData.statistics || statisticsData || {}
+            overview: overviewData,
+            balanceSheet: balanceSheetData.annualReports[0], // Most recent annual report
+            quarterlyBalanceSheet: balanceSheetData.quarterlyReports?.[0], // Most recent quarterly if available
+            quote: quoteData['Global Quote'] || {}
         };
     } catch (error) {
         console.error('Fetch error:', error);
@@ -117,46 +260,46 @@ async function fetchTwelveData(ticker, apiKey) {
 }
 
 function displayResults(ticker, data) {
+    const overview = data.overview;
+    const bs = data.quarterlyBalanceSheet || data.balanceSheet; // Prefer quarterly for most recent data
     const quote = data.quote;
-    const bs = data.balanceSheet;
-    const stats = data.statistics;
     
-    // Extract values from Twelve Data format
-    const totalAssets = parseFloat(bs.assets?.total_assets) || 0;
-    const cash = parseFloat(bs.assets?.current_assets?.cash_and_cash_equivalents) || 0;
-    const shortTermInvestments = parseFloat(bs.assets?.current_assets?.short_term_investments) || 0;
-    const receivables = parseFloat(bs.assets?.current_assets?.accounts_receivable) || 0;
-    const totalLiabilities = parseFloat(bs.liabilities?.total_liabilities) || 0;
-    const shortTermDebt = parseFloat(bs.liabilities?.current_liabilities?.short_term_debt) || 0;
-    const longTermDebt = parseFloat(bs.liabilities?.non_current_liabilities?.long_term_debt) || 0;
+    // Alpha Vantage Balance Sheet field names
+    const totalAssets = parseFloat(bs.totalAssets) || 0;
+    const cash = parseFloat(bs.cashAndCashEquivalentsAtCarryingValue) || 0;
+    const shortTermInvestments = parseFloat(bs.shortTermInvestments) || 0;
+    const receivables = parseFloat(bs.currentNetReceivables) || 0;
+    const totalLiabilities = parseFloat(bs.totalLiabilities) || 0;
+    const shortTermDebt = parseFloat(bs.shortTermDebt) || parseFloat(bs.currentDebt) || 0;
+    const longTermDebt = parseFloat(bs.longTermDebt) || parseFloat(bs.longTermDebtNoncurrent) || 0;
     const totalDebt = shortTermDebt + longTermDebt;
     
-    const currentPrice = parseFloat(quote.close) || parseFloat(quote.price) || 0;
-    // Try multiple paths for shares outstanding
-    const sharesOutstanding = parseFloat(stats.shares_outstanding) || 
-                              parseFloat(stats.shares_basic_outstanding) ||
-                              parseFloat(stats.valuations_metrics?.shares_outstanding) ||
-                              parseFloat(stats.stock_statistics?.shares_outstanding) ||
-                              parseFloat(quote.shares_outstanding) || 
-                              1;
-    const companyName = quote.name || ticker;
-    
-    console.log('Shares outstanding raw:', stats.shares_outstanding, stats);
-    
-    // Include short-term investments in liquid assets
-    const liquidCash = cash + shortTermInvestments;
+    // Get price from quote, fallback to overview
+    const currentPrice = parseFloat(quote['05. price']) || parseFloat(overview['50DayMovingAverage']) || 0;
+    const sharesOutstanding = parseFloat(overview.SharesOutstanding) || 1;
+    const companyName = overview.Name || ticker;
+    const reportDate = bs.fiscalDateEnding || 'Latest';
     
     console.log('Extracted values:', {
-        totalAssets, cash: liquidCash, receivables, totalLiabilities, totalDebt, 
+        totalAssets, cash, shortTermInvestments, receivables,
+        totalLiabilities, totalDebt, shortTermDebt, longTermDebt,
         currentPrice, sharesOutstanding, companyName
     });
     
-    // Calculate liquid and illiquid assets
+    // Calculate derived values
+    const liquidCash = cash + shortTermInvestments;
     const liquidAssets = liquidCash + receivables;
     const illiquidAssets = totalAssets - liquidAssets;
     
     // Yahoo Finance link for verification
     const yahooLink = `https://finance.yahoo.com/quote/${ticker}/balance-sheet/`;
+    
+    // Update the results UI
+    document.getElementById('stockName').textContent = `${ticker} - ${companyName}`;
+    document.getElementById('stockPrice').textContent = `$${currentPrice.toFixed(2)}`;
+    document.getElementById('reportDate').textContent = `Balance Sheet: ${reportDate}`;
+    
+    resultsDiv.classList.remove('hidden');
     
     // --- CHECK 1: Illiquid Asset Ratio (>= 20%) ---
     const illiquidRatio = totalAssets > 0 ? (illiquidAssets / totalAssets) : 0;
@@ -183,7 +326,6 @@ function displayResults(ticker, data) {
     // --- CHECK 2: Net Liquid Assets vs Price ---
     const netLiquidAssets = liquidAssets - totalLiabilities;
     const netLiquidPerShare = sharesOutstanding > 0 ? (netLiquidAssets / sharesOutstanding) : 0;
-    // If net liquid is negative, it automatically passes (you're paying for the business, not just cash)
     const check2Pass = netLiquidPerShare < 0 || currentPrice > netLiquidPerShare;
     
     document.getElementById('check2Status').textContent = check2Pass ? 'PASS' : 'FAIL';
@@ -193,7 +335,7 @@ function displayResults(ticker, data) {
             <span class="field-label">Cash + Investments</span>: <strong>${formatCurrency(liquidCash)}</strong><br>
             <span class="field-label">Receivables</span> <span class="yahoo-field">(Yahoo: "Receivables")</span>: <strong>${formatCurrency(receivables)}</strong><br>
             <span class="field-label">Total Liabilities</span> <span class="yahoo-field">(Yahoo: "Total Liabilities Net Minority Interest")</span>: <strong>${formatCurrency(totalLiabilities)}</strong><br>
-            <span class="field-label">Shares Outstanding</span> <span class="yahoo-field">(Yahoo: Statistics → "Shares Outstanding")</span>: <strong>${formatNumber(sharesOutstanding)}</strong>
+            <span class="field-label">Shares Outstanding</span>: <strong>${formatNumber(sharesOutstanding)}</strong>
         </div>
         <div class="calculation-box">
             Net Liquid Assets = (Cash + Investments + Receivables) - Total Liabilities<br>
@@ -217,14 +359,13 @@ function displayResults(ticker, data) {
     document.getElementById('check3Status').className = `check-status ${check3Pass ? 'pass' : 'fail'}`;
     document.getElementById('check3Formula').innerHTML = `
         <div class="field-mapping">
-            <span class="field-label">Current Debt</span> <span class="yahoo-field">(Yahoo: "Current Debt")</span>: <strong>${formatCurrency(shortTermDebt)}</strong><br>
+            <span class="field-label">Short-term Debt</span> <span class="yahoo-field">(Yahoo: "Current Debt")</span>: <strong>${formatCurrency(shortTermDebt)}</strong><br>
             <span class="field-label">Long-term Debt</span> <span class="yahoo-field">(Yahoo: "Long Term Debt")</span>: <strong>${formatCurrency(longTermDebt)}</strong><br>
+            <span class="field-label">Total Debt</span>: <strong>${formatCurrency(totalDebt)}</strong><br>
             <span class="field-label">Total Assets</span> <span class="yahoo-field">(Yahoo: "Total Assets")</span>: <strong>${formatCurrency(totalAssets)}</strong>
         </div>
         <div class="calculation-box">
-            Total Debt = Current Debt + Long-term Debt<br>
-            Total Debt = ${formatCurrency(shortTermDebt)} + ${formatCurrency(longTermDebt)} = ${formatCurrency(totalDebt)}<br><br>
-            <strong>Debt Ratio = ${(debtRatio * 100).toFixed(2)}%</strong> (must be < 37%)
+            <strong>Debt Ratio = ${(debtRatio * 100).toFixed(2)}%</strong> (must be < 37%, i.e., less than 1/3)
         </div>
     `;
     document.getElementById('check3Link').href = yahooLink;
@@ -236,13 +377,6 @@ function displayResults(ticker, data) {
     overallResult.innerHTML = allPass 
         ? '✓ HALAL (Strict Hanafi Compliant)' 
         : '✗ NOT COMPLIANT';
-    
-    // Update header
-    document.getElementById('stockName').textContent = `${ticker} - ${companyName}`;
-    document.getElementById('stockPrice').textContent = `$${currentPrice.toFixed(2)}`;
-    
-    // Show results
-    resultsDiv.classList.remove('hidden');
 }
 
 function showError(message) {

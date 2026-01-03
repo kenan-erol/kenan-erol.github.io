@@ -87,6 +87,13 @@
                 font-size: 1.25rem;
                 color: #a7f3d0;
             }
+            .report-date {
+                font-size: 0.9rem;
+                color: #86efac;
+                opacity: 0.8;
+                width: 100%;
+                text-align: center;
+            }
             .check-item {
                 background: #065f46;
                 border-radius: 0.5rem;
@@ -206,6 +213,33 @@
                 color: #6ee7b7;
                 font-size: 0.875rem;
             }
+            .rate-limit-info {
+                margin-top: 1rem;
+                padding: 0.75rem;
+                background: rgba(6, 95, 70, 0.5);
+                border-radius: 0.5rem;
+                text-align: center;
+            }
+            .request-counter {
+                font-size: 0.875rem;
+                color: #a7f3d0;
+                margin: 0;
+            }
+            .request-counter.warning {
+                color: #fbbf24;
+                font-weight: bold;
+            }
+            .cooldown-timer {
+                font-size: 1rem;
+                color: #fbbf24;
+                margin-top: 0.5rem;
+                font-weight: bold;
+                animation: pulse 1s ease-in-out infinite;
+            }
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.6; }
+            }
             .hidden {
                 display: none;
             }
@@ -307,16 +341,17 @@
                     <ol class="list-decimal ml-4 mt-2">
                         <li><strong>Illiquid Asset Ratio ≥ 20%</strong> - Company must have substantial tangible assets</li>
                         <li><strong>Price > Net Liquid Assets/Share</strong> - Prevents buying cash at a discount (Riba)</li>
-                        <li><strong>Debt to Assets < 37%</strong> - Company isn't excessively leveraged</li>
+                        <li><strong>Debt to Assets < 37%</strong> - Company isn't excessively leveraged (based on 1/3 rule)</li>
                     </ol>
-                    <p class="mt-2 text-sm">This uses stricter criteria than standard AAOIFI screening. <a href="https://twelvedata.com/apikey" target="_blank">Get a free API key here</a> (800 requests/day - enough for 100+ stocks).</p>
+                    <p class="mt-2 text-sm"><strong>Why 37% (one-third)?</strong> This threshold is based on <a href="https://aaoifi.com/shariaa-standards/?lang=en" target="_blank" style="color: #6ee7b7;">AAOIFI Shariah Standard 21</a> which sets 33% as the maximum for interest-bearing debt. The 37% allows for minor fluctuations. Learn more: <a href="https://www.investopedia.com/terms/s/shariah-compliant-funds.asp" target="_blank" style="color: #6ee7b7;">Investopedia on Shariah Funds</a></p>
+                    <p class="mt-2 text-sm">Get your free API key from <a href="https://www.alphavantage.co/support/#api-key" target="_blank" style="color: #6ee7b7;">Alpha Vantage</a> (25 requests/day on free tier).</p>
                 </div>
 
                 <div class="input-section">
                     <div class="api-key-section">
-                        <label class="block mb-1">API Key (from Twelve Data - free, 800/day)</label>
+                        <label class="block mb-1">API Key (from <a href="https://www.alphavantage.co/support/#api-key" target="_blank" style="color: #6ee7b7;">Alpha Vantage</a> - free tier)</label>
                         <div class="input-row">
-                            <input type="password" id="apiKey" class="input-field" placeholder="Enter your Twelve Data API key">
+                            <input type="password" id="apiKey" class="input-field" placeholder="Enter your Alpha Vantage API key">
                             <button id="saveKeyBtn" class="btn">Save Key</button>
                         </div>
                         <p id="keySavedMsg" class="api-key-saved hidden">✓ API key saved in browser</p>
@@ -328,6 +363,11 @@
                             <input type="text" id="ticker" class="input-field" placeholder="e.g., AAPL, TSMC, MSFT" style="text-transform: uppercase;">
                             <button id="analyzeBtn" class="btn">Analyze</button>
                         </div>
+                    </div>
+                    
+                    <div class="rate-limit-info">
+                        <p id="requestCounter" class="request-counter">Loading...</p>
+                        <p id="cooldownTimer" class="cooldown-timer hidden"></p>
                     </div>
                 </div>
 
@@ -342,6 +382,7 @@
                         <div class="stock-header">
                             <span class="stock-name" id="stockName"></span>
                             <span class="stock-price" id="stockPrice"></span>
+                            <span class="report-date" id="reportDate"></span>
                         </div>
 
                         <!-- Check 1: Illiquid Asset Ratio -->
