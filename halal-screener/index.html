@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+    <script>
+        const prefersDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const isDarkMode = prefersDarkMode;
+        const html = document.querySelector("html");
+        if(isDarkMode) {
+            html.classList.add("dark");
+        } else {
+            html.classList.remove("dark");
+        }
+    </script>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../style.css">
+        <link rel="icon" href="../assets/me.jpg">
+        <title>Hanafi Halal Stock Screener | Kenan Erol</title>
+        <meta name="description" content="Strict Hanafi Halal Stock Screener - Check if a stock is Shariah compliant">
+        <style>
+            .screener-container {
+                max-width: 800px;
+                margin: 0 auto;
+                padding: 2rem 1rem;
+            }
+            .input-section {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+            .input-row {
+                display: flex;
+                gap: 0.5rem;
+                flex-wrap: wrap;
+            }
+            .input-field {
+                padding: 0.75rem 1rem;
+                border: 1px solid #065f46;
+                border-radius: 0.5rem;
+                background: #064e3b;
+                color: white;
+                font-size: 1rem;
+                flex: 1;
+                min-width: 150px;
+            }
+            .input-field::placeholder {
+                color: #a7f3d0;
+            }
+            .btn {
+                padding: 0.75rem 1.5rem;
+                background: #10b981;
+                color: white;
+                border: none;
+                border-radius: 0.5rem;
+                font-size: 1rem;
+                cursor: pointer;
+                font-weight: bold;
+                transition: background 0.2s;
+            }
+            .btn:hover {
+                background: #059669;
+            }
+            .btn:disabled {
+                background: #6b7280;
+                cursor: not-allowed;
+            }
+            .results-card {
+                background: #064e3b;
+                border-radius: 1rem;
+                padding: 1.5rem;
+                margin-top: 1.5rem;
+            }
+            .stock-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1rem;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            .stock-name {
+                font-size: 1.5rem;
+                font-weight: bold;
+            }
+            .stock-price {
+                font-size: 1.25rem;
+                color: #a7f3d0;
+            }
+            .check-item {
+                background: #065f46;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            .check-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 0.5rem;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+            .check-title {
+                font-weight: bold;
+                font-size: 1.1rem;
+            }
+            .check-status {
+                padding: 0.25rem 0.75rem;
+                border-radius: 1rem;
+                font-weight: bold;
+                font-size: 0.875rem;
+            }
+            .pass {
+                background: #10b981;
+                color: white;
+            }
+            .fail {
+                background: #ef4444;
+                color: white;
+            }
+            .check-details {
+                font-size: 0.9rem;
+                color: #d1fae5;
+                margin-top: 0.5rem;
+            }
+            .check-formula {
+                font-family: monospace;
+                background: #047857;
+                padding: 0.5rem;
+                border-radius: 0.25rem;
+                margin-top: 0.5rem;
+                font-size: 0.85rem;
+                overflow-x: auto;
+            }
+            .verify-link {
+                color: #6ee7b7;
+                text-decoration: underline;
+                font-size: 0.85rem;
+            }
+            .verify-link:hover {
+                color: #a7f3d0;
+            }
+            .overall-result {
+                text-align: center;
+                padding: 1.5rem;
+                border-radius: 0.5rem;
+                margin-top: 1rem;
+                font-size: 1.5rem;
+                font-weight: bold;
+            }
+            .overall-pass {
+                background: #10b981;
+            }
+            .overall-fail {
+                background: #ef4444;
+            }
+            .error-message {
+                background: #7f1d1d;
+                color: #fecaca;
+                padding: 1rem;
+                border-radius: 0.5rem;
+                margin-top: 1rem;
+            }
+            .loading {
+                text-align: center;
+                padding: 2rem;
+                color: #a7f3d0;
+            }
+            .info-box {
+                background: #065f46;
+                border-radius: 0.5rem;
+                padding: 1rem;
+                margin-bottom: 1.5rem;
+                font-size: 0.9rem;
+            }
+            .info-box a {
+                color: #6ee7b7;
+            }
+            .api-key-section {
+                margin-bottom: 1rem;
+            }
+            .api-key-saved {
+                color: #6ee7b7;
+                font-size: 0.875rem;
+            }
+            .hidden {
+                display: none;
+            }
+            .data-sources {
+                margin-top: 1rem;
+                padding-top: 1rem;
+                border-top: 1px solid #065f46;
+            }
+            .threshold-note {
+                font-size: 0.8rem;
+                color: #a7f3d0;
+                font-style: italic;
+            }
+        </style>
+    </head>
+    <body class="text-textColor dark:darktext-textColor dark:bg-emerald-800">
+        <header class="sticky top-0 z-50 w-full shadow-md bg-white dark:bg-emerald-900 text-textColor dark:darktext-textColor text-sm">
+            <div class="flex items-center lg:mx-10 mx-6 py-4">
+                <div>
+                    <a key="home" href="/index.html">Home</a>
+                </div>
+                <div class="flex-grow"></div>
+                <div class="navbar-menu hidden lg:inline-block flex items-center">
+                    <a href="/projects.html" class="pl-8 py-2"> Projects </a>
+                </div>
+                <div class="navbar-social hidden lg:inline-block flex items-center pl-8">
+                    <a href="https://linkedin.com/in/kgerol"> <div class="inline-block"><img class="h-6 lg:h-10" src="../assets/ratio.svg" alt="linkedin"></div> </a>
+                    <a href="https://github.com/kenan-erol"> <div class="inline-block pl-8"><img class="h-6 lg:h-10" src="../assets/git.svg" alt="github"></div> </a>
+                    <a href="https://devpost.com/kenan-erol"> <div class="inline-block pl-8"><img class="h-6 lg:h-10" src="../assets/devpost.svg" alt="Devpost"></div> </a>
+                </div>
+            </div>
+        </header>
+        
+        <main class="relative min-h-screen">
+            <div class="screener-container">
+                <h1 class="text-3xl font-bold mb-2">Strict Hanafi Halal Stock Screener</h1>
+                <p class="mb-4 text-emerald-200">Check if a stock meets strict Hanafi Shariah compliance criteria</p>
+                
+                <div class="info-box">
+                    <p><strong>What this checks:</strong></p>
+                    <ol class="list-decimal ml-4 mt-2">
+                        <li><strong>Illiquid Asset Ratio ≥ 20%</strong> - Company must have substantial tangible assets</li>
+                        <li><strong>Price > Net Liquid Assets/Share</strong> - Prevents buying cash at a discount (Riba)</li>
+                        <li><strong>Debt to Assets < 37%</strong> - Company isn't excessively leveraged</li>
+                    </ol>
+                    <p class="mt-2 text-sm">This uses stricter criteria than standard AAOIFI screening. <a href="https://www.alphavantage.co/support/#api-key" target="_blank">Get a free API key here</a> (25 requests/day).</p>
+                </div>
+
+                <div class="input-section">
+                    <div class="api-key-section">
+                        <label class="block mb-1">API Key (from Alpha Vantage - free)</label>
+                        <div class="input-row">
+                            <input type="password" id="apiKey" class="input-field" placeholder="Enter your Alpha Vantage API key">
+                            <button id="saveKeyBtn" class="btn">Save Key</button>
+                        </div>
+                        <p id="keySavedMsg" class="api-key-saved hidden">✓ API key saved in browser</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block mb-1">Stock Ticker</label>
+                        <div class="input-row">
+                            <input type="text" id="ticker" class="input-field" placeholder="e.g., AAPL, TSMC, MSFT" style="text-transform: uppercase;">
+                            <button id="analyzeBtn" class="btn">Analyze</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="loading" class="loading hidden">
+                    <p>⏳ Fetching financial data...</p>
+                </div>
+
+                <div id="error" class="error-message hidden"></div>
+
+                <div id="results" class="hidden">
+                    <div class="results-card">
+                        <div class="stock-header">
+                            <span class="stock-name" id="stockName"></span>
+                            <span class="stock-price" id="stockPrice"></span>
+                        </div>
+
+                        <!-- Check 1: Illiquid Asset Ratio -->
+                        <div class="check-item">
+                            <div class="check-header">
+                                <span class="check-title">1. Illiquid Asset Ratio</span>
+                                <span id="check1Status" class="check-status"></span>
+                            </div>
+                            <p class="check-details">
+                                Ensures the company is a "real business" with tangible assets, not just cash/debt.
+                            </p>
+                            <p class="threshold-note">Threshold: ≥ 20%</p>
+                            <div class="check-formula" id="check1Formula"></div>
+                            <div class="data-sources">
+                                <a id="check1Link" class="verify-link" target="_blank">📊 Verify on Yahoo Finance Balance Sheet →</a>
+                            </div>
+                        </div>
+
+                        <!-- Check 2: Net Liquid Assets vs Price -->
+                        <div class="check-item">
+                            <div class="check-header">
+                                <span class="check-title">2. Net Liquid Assets vs. Price</span>
+                                <span id="check2Status" class="check-status"></span>
+                            </div>
+                            <p class="check-details">
+                                Prevents buying cash at a discount (Riba). Stock price must exceed net liquid assets per share.
+                            </p>
+                            <p class="threshold-note">Threshold: Price > Net Liquid Assets per Share</p>
+                            <div class="check-formula" id="check2Formula"></div>
+                            <div class="data-sources">
+                                <a id="check2Link" class="verify-link" target="_blank">📊 Verify on Yahoo Finance Balance Sheet →</a>
+                            </div>
+                        </div>
+
+                        <!-- Check 3: Debt to Assets -->
+                        <div class="check-item">
+                            <div class="check-header">
+                                <span class="check-title">3. Debt to Total Assets</span>
+                                <span id="check3Status" class="check-status"></span>
+                            </div>
+                            <p class="check-details">
+                                Ensures the company isn't excessively leveraged with interest-bearing debt.
+                            </p>
+                            <p class="threshold-note">Threshold: < 37%</p>
+                            <div class="check-formula" id="check3Formula"></div>
+                            <div class="data-sources">
+                                <a id="check3Link" class="verify-link" target="_blank">📊 Verify on Yahoo Finance Balance Sheet →</a>
+                            </div>
+                        </div>
+
+                        <!-- Overall Result -->
+                        <div id="overallResult" class="overall-result"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script src="app.js"></script>
+    </body>
+</html>
