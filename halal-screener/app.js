@@ -351,9 +351,9 @@ function displayResults(ticker, data) {
     `;
     document.getElementById('check2Link').href = yahooLink;
     
-    // --- CHECK 3: Debt to Total Assets (< 37%) ---
+    // --- CHECK 3: Debt to Total Assets (< 33%) ---
     const debtRatio = totalAssets > 0 ? (totalDebt / totalAssets) : 0;
-    const check3Pass = debtRatio < 0.37;
+    const check3Pass = debtRatio < 0.33;
     
     document.getElementById('check3Status').textContent = check3Pass ? 'PASS' : 'FAIL';
     document.getElementById('check3Status').className = `check-status ${check3Pass ? 'pass' : 'fail'}`;
@@ -365,7 +365,7 @@ function displayResults(ticker, data) {
             <span class="field-label">Total Assets</span> <span class="yahoo-field">(Yahoo: "Total Assets")</span>: <strong>${formatCurrency(totalAssets)}</strong>
         </div>
         <div class="calculation-box">
-            <strong>Debt Ratio = ${(debtRatio * 100).toFixed(2)}%</strong> (must be < 37%, i.e., less than 1/3)
+            <strong>Debt Ratio = ${(debtRatio * 100).toFixed(2)}%</strong> (must be < 33%, i.e., less than 1/3)
         </div>
     `;
     document.getElementById('check3Link').href = yahooLink;
@@ -375,7 +375,7 @@ function displayResults(ticker, data) {
     const overallResult = document.getElementById('overallResult');
     overallResult.className = `overall-result ${allPass ? 'overall-pass' : 'overall-fail'}`;
     overallResult.innerHTML = allPass 
-        ? '✓ HALAL (Strict Hanafi Compliant)' 
+        ? '✓ HALAL' 
         : '✗ NOT COMPLIANT';
 }
 
