@@ -17,6 +17,10 @@
         <meta name="viewport" content="width=device-width, intial-scale=1.0">
         <link rel="stylesheet" href="style.css">
         <link rel="icon" href="./assets/me.jpg">
+        <!-- KaTeX for math rendering -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
         <title>Homepage | Kenan Erol</title>
         <meta name="description" content="Undergraduate Student at Yale University EECS">
         <link rel="canonical" href="https://kenan-erol.com">
@@ -115,18 +119,41 @@
 						</p>
 					</div>
 					<div>
+						<h3 class="text-xl font-bold"> 4-bit Perceptron ASIC </h3>
+						<p>
+							"Parcognition" is a custom hardware-accelerated 4-bit perceptron designed for versatile classification tasks, specifically optimized for low-latency neural network operations. The architecture features a flexible design where the number of inputs and weights is user-defined, feeding into a Multiply-Accumulate (MAC) unit with an integrated ReLU activation function. Key hardware optimizations included parallelizing the loading of inputs and weights via dual regfiles and designing a bespoke combinational multiplier to avoid the overhead of sequential logic. To ensure robust operation, I utilized 12-bit wide registers and adders to prevent overflow during partial sum accumulation.
+						</p>
+					</div>
+					<div>
 						<h3 class="text-xl font-bold"> PARCv2 Processor with Bypassing and Stalling </h3>
 						<p>
 
-							Detailed description coming soon. Verilog
+							This project involved the extensive modification of a single-issue PARCv2 core to support modern architectural features like in-order retirement and speculative execution. I designed a 16-entry Reorder Buffer (ROB) to manage instruction commit in program order, which solved critical write-after-write (WAW) hazards found in simpler out-of-order designs. To further boost performance, I implemented a branch speculation unit that allows the pipeline to continue fetching instructions while a branch is pending. This required complex state-tracking logic to handle mispredictions, including a pre-branch tail register to rollback the ROB to its correct state upon a mispredict. Evaluation against a baseline bypass core showed dramatic performance gains, particularly in a matrix multiplication benchmark where the overlapping of independent multiply operations led to an improvement of up to 89% in IPC.
 						</p>
 					</div>
 					<h2 class="text-2xl font-bold"> 2024 </h2>
 					<div>
-						<h3 class="text-xl font-bold"> LASSO Optimizer Chip </h3>
+						<h3 class="text-xl font-bold">Asynchronous C-LASSO Hardware Accelerator <a href="./assets/LASSO-3.pdf"> 📄 </a></h3>
 						<p>
-
-							Detailed description coming soon. Worked in collaboration with the Yale Computer Systems Lab under Professor Rajit Manohar.
+							In this project, I developed an asynchronous hardware accelerator designed to solve the Constrained LASSO (C-LASSO) problem, a fundamental optimization task in sparse coding. The design utilizes the Spiking Locally Competitive Algorithm (S-LCA), which translates continuous neural dynamics into discrete, energy-efficient spike events.
+						</p>
+						<p>
+							I architected the system to be highly efficient by implementing a central control unit that manages global constants and spike information. This architectural choice was critical as it reduced the required communication channels between neurons from \(O(n^2)\) to \(O(n)\), significantly lowering the hardware overhead. To simplify the digital implementation, I rearranged the governing differential equations to eliminate the need for complex multiply and divide operations, utilizing bit-shifts instead.
+						</p>
+						<p>
+							<b>Mathematical Foundation:</b> The network minimizes the following objective function:
+						</p>
+						<p style="text-align: center; margin: 1rem 0;">
+							$$\min_{\alpha \ge 0} \frac{1}{2} \|x - \Phi \alpha\|_2^2 + \lambda \|\alpha\|_1$$
+						</p>
+						<p>
+							The neurons follow Leaky Integrate-and-Fire (LIF) dynamics, where the membrane potential \(u_i\) is governed by:
+						</p>
+						<p style="text-align: center; margin: 1rem 0;">
+							$$\frac{du_i}{dt} = b_i - u_i - \sum_{j \neq i} w_{ij} a_j$$
+						</p>
+						<p>
+							The implementation process involved three distinct methodologies: Python (as a gold-standard baseline), Communicating Hardware Processes (CHP), and Dataflow. While the high-level abstractions were verified as correct, the project involved rigorous low-level debugging during synthesis into production rules for the TSMC 180nm process. This testing phase was instrumental in identifying several bugs in the ACT/Maelstrom synthesis tools, including issues with non-exclusive guards and internal loop handling, for which I collaborated with tool developers to resolve.
 						</p>
 					</div>
 					<h2 class="text-2xl font-bold"> 2023 </h2>
